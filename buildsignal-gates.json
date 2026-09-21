@@ -1,0 +1,25 @@
+{
+  "schema": "buildsignal-creative-gates/1",
+  "job_id": "buildsignal-answer-lens-20260921",
+  "repository": "https://github.com/donizetiferr/livre-10",
+  "required_visibility": "private",
+  "runtime": { "node": ">=22", "dependencies": [] },
+  "test_files": ["tests/core.test.mjs", "tests/storage.test.mjs", "tests/demo.test.mjs"],
+  "test_command": "node scripts/run-gates.mjs",
+  "test_execution": "Single-process Node built-ins only; no network or child processes. Each test_file is also runnable directly with node.",
+  "demo_file": "scripts/demo.mjs",
+  "demo_command": "node scripts/demo.mjs",
+  "demo_description": "Deterministic runnable Node program emitting self-contained synthetic result JSON with fixed seed, timestamps and illustrative ratings.",
+  "separate_integration_checks": {
+    "server_test_files": ["tests/server.test.mjs"],
+    "server_command": "node --test tests/server.test.mjs",
+    "browser_test_files": ["tests/browser.test.mjs"],
+    "browser_command": "node --test tests/browser.test.mjs",
+    "requirements": "Server checks use temporary loopback sockets. Browser checks additionally require the pinned development-only Playwright package and an installed Chrome/Chromium. Neither belongs in the isolated gate test_files."
+  },
+  "evidence_file": "docs/evidence.md",
+  "differentiation_file": "docs/differentiation.md",
+  "license_file": "LICENSE",
+  "independent_release_review_required": true,
+  "publication_authorized": false
+}

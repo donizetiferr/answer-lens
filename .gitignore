@@ -1,0 +1,20 @@
+node_modules/
+.DS_Store
+*.tmp
+.env
+.env.*
+*.local.*
+CHECKPOINT.local.md
+# Raw logs, browser exports and host-specific Studio receipts stay on the VPS.
+/evidence/
+/media/demo/
+/media/demo-v2/
+# Preserve the pre-review screenshots without publishing stale evidence.
+/media/*.png
+/scripts/make-demo-project.py
+# Publish only the four captures inspected in the finishing review.
+/media/review-v2/*
+!/media/review-v2/desktop-blind.png
+!/media/review-v2/desktop-result.png
+!/media/review-v2/mobile-ratings.png
+!/media/review-v2/mobile-result.png
