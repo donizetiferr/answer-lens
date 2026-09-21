@@ -4,7 +4,7 @@
 
 A small English web tool for comparing two AI answers with their source names hidden until after your own verdict. Paste a question and two answers, read the shuffled A/B pair, rate it yourself, then reveal the names and keep a complete result JSON.
 
-**[Try Answer Lens in your browser](https://donizetiferr.github.io/livre-10/)** · MIT licensed · No account or API key required.
+**[Try Answer Lens in your browser](https://donizetiferr.github.io/answer-lens/)** · MIT licensed · No account or API key required.
 
 [Watch the six-second preview](media/answer-lens-preview.mp4). It combines real app screenshots with labelled synthetic examples and English captions, rendered and verified with DoniStudio. It is a quick preview, not a model benchmark.
 
@@ -19,8 +19,8 @@ These are actual browser captures with synthetic example answers and scripted te
 Node **22 or newer** is required for the included local server and tests. The browser app itself is vanilla HTML, CSS and JavaScript, with **zero runtime packages** and no build step.
 
 ```sh
-git clone https://github.com/donizetiferr/livre-10.git
-cd livre-10
+git clone https://github.com/donizetiferr/answer-lens.git
+cd answer-lens
 node scripts/serve.mjs
 ```
 
