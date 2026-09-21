@@ -11,7 +11,8 @@
     "tests/core.test.mjs",
     "tests/storage.test.mjs",
     "tests/demo.test.mjs",
-    "tests/evolution.test.mjs"
+    "tests/evolution.test.mjs",
+    "tests/prototype.test.mjs"
   ],
   "test_command": "node scripts/run-gates.mjs",
   "test_execution": "Single-process Node built-ins only; no network or child processes. Each test_file is also runnable directly with node.",
@@ -25,9 +26,10 @@
     "server_command": "node --test tests/server.test.mjs",
     "browser_test_files": [
       "tests/browser.test.mjs",
-      "tests/evolution.browser.test.mjs"
+      "tests/evolution.browser.test.mjs",
+      "tests/prototype.browser.test.mjs"
     ],
-    "browser_command": "node --test --test-concurrency=1 tests/browser.test.mjs tests/evolution.browser.test.mjs",
+    "browser_command": "node --test --test-concurrency=1 tests/browser.test.mjs tests/evolution.browser.test.mjs tests/prototype.browser.test.mjs",
     "requirements": "Server checks use temporary loopback sockets. Browser checks additionally require the pinned development-only Playwright package and an installed Chrome/Chromium. Neither belongs in the isolated gate test_files."
   },
   "evidence_file": "docs/evidence.md",

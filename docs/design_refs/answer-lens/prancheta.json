@@ -2,23 +2,111 @@
   "versao": 1,
   "colecao": {
     "titulo": "Answer Lens",
-    "descricao": "Protótipo local navegável da jornada real: preparar duas respostas, avaliar sem nomes, revelar, exportar/importar e limpar. Usa somente exemplos sintéticos até o visitante inserir seu próprio texto.",
+    "descricao": "Protótipo atual do aplicativo 2.0: ler respostas completas sem nomes, decidir com notas opcionais, revelar, copiar, exportar/importar e comparar outro par. Armazenamento de demonstração isolado do aplicativo principal.",
     "finalidade": "atual",
     "inicio": "comparison.html",
-    "jornadas": [{"id":"compare","titulo":"Comparar duas respostas","inicio":"comparison.html","dispositivo":"responsivo"}]
+    "jornadas": [
+      {
+        "id": "compare",
+        "titulo": "Ler, decidir e reutilizar — desktop",
+        "inicio": "comparison.html",
+        "dispositivo": "desktop",
+        "descricao": "1440×1000. Fluxo completo com decisão obrigatória, notas opcionais, cópia e novo par para a mesma pergunta."
+      },
+      {
+        "id": "compare-mobile",
+        "titulo": "Ler, decidir e reutilizar — celular",
+        "inicio": "mobile.html",
+        "dispositivo": "smartphone",
+        "descricao": "390×844. Mesmo aplicativo funcional, com navegação A/B/decisão, respostas completas e controles locais."
+      }
+    ],
+    "versaoDoProduto": "2.0.0",
+    "fonteDaVersao": {
+      "arquivo": "resources.json",
+      "campo": "appVersion"
+    }
   },
-  "padrao": {"canal":"web","ambiente":"demonstração","dispositivo":"responsivo","perfilDesign":"answer-lens-claro"},
+  "padrao": {
+    "canal": "web",
+    "ambiente": "demonstração",
+    "dispositivo": "responsivo",
+    "perfilDesign": "answer-lens-claro"
+  },
   "telas": {
     "comparison.html": {
-      "idTela":"answer-lens:comparison",
-      "titulo":"Comparar, escolher e revelar",
-      "tipo":"prototipo",
-      "estado":"preparação; demo e demais estados navegáveis",
-      "capacidade":"interacao-local",
-      "viewport":{"largura":1440,"altura":1000},
-      "origem":"aplicação do commit 7943949ffd1963e0e354dff9c03822255ebbe652",
-      "build":"1.0.0",
-      "recursos":["styles.css","icon.svg","sw.js","src/app.js","src/core.js","src/storage.js","src/demo.js"]
+      "idTela": "answer-lens:comparison",
+      "titulo": "Comparar, escolher e revelar",
+      "tipo": "prototipo",
+      "estado": "preparação; leitura A/B; decisão; cópia; próximo par; salvamento isolado",
+      "capacidade": "interacao-local",
+      "viewport": {
+        "largura": 1440,
+        "altura": 1000
+      },
+      "origem": "Aplicativo raiz 2.0.0; SHA-256 do conjunto fonte 4bd10f0eba1e98644e7a7b8305ad0280413808ca768b67ca763ec0233e4e6240. Adaptações de preview documentadas em resources.json.",
+      "build": "2.0.0",
+      "recursos": [
+        "styles.css",
+        "icon.svg",
+        "sw.js",
+        "src/app.js",
+        "src/core.js",
+        "src/storage.js",
+        "src/demo.js",
+        "src/output.js",
+        "resources.json"
+      ],
+      "cenarios": [
+        {
+          "id": "read-decide-copy-repeat",
+          "titulo": "Ler, decidir, copiar e repetir",
+          "descricao": "Demonstração sintética, veredito obrigatório, notas opcionais, nomes após revelar, cópia ou alternativa em texto e próximo par conservando só a pergunta."
+        },
+        {
+          "id": "isolated-save",
+          "titulo": "Salvar sem acessar o aplicativo real",
+          "descricao": "Chaves v2, legado v1, lock e cache próprios do preview. Nenhum dado real é carregado automaticamente."
+        }
+      ],
+      "dispositivo": "desktop"
+    },
+    "mobile.html": {
+      "tipo": "prototipo",
+      "capacidade": "interacao-local",
+      "estado": "preparação; leitura A/B; decisão; cópia; próximo par; salvamento isolado",
+      "origem": "Aplicativo raiz 2.0.0; SHA-256 do conjunto fonte 4bd10f0eba1e98644e7a7b8305ad0280413808ca768b67ca763ec0233e4e6240. Adaptações de preview documentadas em resources.json.",
+      "build": "2.0.0",
+      "recursos": [
+        "styles.css",
+        "icon.svg",
+        "sw.js",
+        "src/app.js",
+        "src/core.js",
+        "src/storage.js",
+        "src/demo.js",
+        "src/output.js",
+        "resources.json"
+      ],
+      "cenarios": [
+        {
+          "id": "read-decide-copy-repeat",
+          "titulo": "Ler, decidir, copiar e repetir",
+          "descricao": "Demonstração sintética, veredito obrigatório, notas opcionais, nomes após revelar, cópia ou alternativa em texto e próximo par conservando só a pergunta."
+        },
+        {
+          "id": "isolated-save",
+          "titulo": "Salvar sem acessar o aplicativo real",
+          "descricao": "Chaves v2, legado v1, lock e cache próprios do preview. Nenhum dado real é carregado automaticamente."
+        }
+      ],
+      "idTela": "answer-lens:comparison-mobile",
+      "titulo": "Comparar, escolher e revelar — celular",
+      "viewport": {
+        "largura": 390,
+        "altura": 844
+      },
+      "dispositivo": "smartphone"
     }
   }
 }

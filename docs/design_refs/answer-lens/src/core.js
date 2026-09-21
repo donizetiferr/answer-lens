@@ -1,5 +1,5 @@
 // Pure comparison logic. No DOM, network, or storage access.
-export const VERSION = '1.0.0';
+export const VERSION = '2.0.0';
 export const LIMITS = Object.freeze({ question: 8000, answer: 40000, origin: 120, note: 2000, json: 600000 });
 export const METRICS = Object.freeze(['usefulness', 'clarity', 'factualConfidence']);
 export const LABELS = Object.freeze(['A', 'B']);
@@ -24,7 +24,7 @@ function iso(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value) && Number.isFinite(Date.parse(value));
 }
 export function emptySession() {
-  return { version: 1, phase: 'setup', remember: false, synthetic: false, question: '',
+  return { version: 2, phase: 'setup', remember: false, synthetic: false, question: '',
     inputs: [{ origin: '', text: '' }, { origin: '', text: '' }],
     randomization: null, ratings: { A: {}, B: {} }, verdict: null, note: '', lockedAt: null };
 }
@@ -70,7 +70,7 @@ export function ratingsComplete(session) {
 }
 export function lockAndReveal(session, verdict, note = '', now = new Date().toISOString()) {
   requireThat(session.phase === 'blind', 'Only a blind comparison can be revealed.');
-  requireThat(ratingsComplete(session), 'Rate all six items first. “Not sure” is valid for factual confidence.');
+  validateSession(session);
   requireThat(['A', 'B', 'tie', 'neither'].includes(verdict), 'Choose your verdict before revealing the sources.');
   text(note, LIMITS.note, 'Your note');
   requireThat(iso(now) && Date.parse(now) >= Date.parse(session.randomization.assignedAt), 'The lock time must not precede the comparison.');
@@ -89,7 +89,7 @@ export function comparisonView(session) {
     }) };
 }
 export function validateSession(raw) {
-  requireThat(isObject(raw) && raw.version === 1 && ['setup', 'blind', 'revealed'].includes(raw.phase), 'Unsupported comparison format.');
+  requireThat(isObject(raw) && raw.version === 2 && ['setup', 'blind', 'revealed'].includes(raw.phase), 'Unsupported comparison format.');
   requireThat(typeof raw.remember === 'boolean' && typeof raw.synthetic === 'boolean', 'Invalid local preferences.');
   text(raw.question, LIMITS.question, 'Your question');
   requireThat(Array.isArray(raw.inputs) && raw.inputs.length === 2, 'Invalid answer pair.');
@@ -118,7 +118,7 @@ export function validateSession(raw) {
     requireThat(Array.isArray(r.order) && r.order.length === 2 && r.order.every((value, i) => value === expected[i]), 'The recorded order does not match the seed.');
     next.randomization = { algorithm: ALGORITHM, seed: r.seed, order: expected, assignedAt: r.assignedAt };
     if (raw.phase === 'revealed') {
-      requireThat(ratingsComplete(next) && next.verdict !== null && iso(raw.lockedAt) && Date.parse(raw.lockedAt) >= Date.parse(r.assignedAt), 'The result needs complete ratings and a locked verdict.');
+      requireThat(next.verdict !== null && iso(raw.lockedAt) && Date.parse(raw.lockedAt) >= Date.parse(r.assignedAt), 'The result needs a locked verdict and valid lock time.');
       next.lockedAt = raw.lockedAt;
     } else requireThat(raw.lockedAt === null, 'A blind comparison cannot have a lock time.');
   }
@@ -128,16 +128,31 @@ export function resultObject(session) {
   const valid = validateSession(session);
   requireThat(valid.phase === 'revealed', 'Reveal only after your verdict; then export.');
   valid.remember = false; // Import never silently consents to persistence.
-  return { schema: 'answer-lens-result/1', app: { name: 'Answer Lens', version: VERSION },
+  return { schema: 'answer-lens-result/2', app: { name: 'Answer Lens', version: VERSION },
     assessment: 'human-self-report', caveats: [...CAVEATS], comparison: valid };
 }
 export const exportResult = session => JSON.stringify(resultObject(session), null, 2);
 export function importResult(json) {
   requireThat(typeof json === 'string' && json.length <= LIMITS.json, 'Result file is too large.');
   let data; try { data = JSON.parse(json); } catch { throw new Error('This is not valid JSON.'); }
-  requireThat(isObject(data) && data.schema === 'answer-lens-result/1' && data.assessment === 'human-self-report', 'This is not an Answer Lens result.');
-  const session = validateSession(data.comparison);
+  requireThat(isObject(data) && ['answer-lens-result/1', 'answer-lens-result/2'].includes(data.schema) && data.assessment === 'human-self-report', 'This is not an Answer Lens result.');
+  const session = data.schema === 'answer-lens-result/1' ? migrateV1(data.comparison) : validateSession(data.comparison);
   requireThat(session.phase === 'revealed', 'Only completed, revealed results can be opened.');
   session.remember = false;
   return session;
+}
+
+// Version boundaries are explicit. A v1 revealed record still requires all six
+// ratings under its original contract; the upgrade does not invent missing data.
+export function migrateV1(raw) {
+  requireThat(isObject(raw) && raw.version === 1, 'Unsupported v1 comparison format.');
+  if (raw.phase === 'revealed') requireThat(ratingsComplete(raw), 'A v1 result needs complete ratings.');
+  const next = validateSession({ ...raw, version: 2 });
+  next.remember = false;
+  return next;
+}
+export function nextPair(session) {
+  const valid = validateSession(session);
+  requireThat(valid.phase === 'revealed', 'Finish this comparison before starting the next pair.');
+  return { ...emptySession(), question: valid.question };
 }

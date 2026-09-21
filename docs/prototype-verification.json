@@ -1,0 +1,207 @@
+{
+  "schema": "answer-lens-prototype-review/1",
+  "round": 3,
+  "reviewed_base_sha": "78a25c0caba6c6553845cbcb30b5b3bbaf0e8626",
+  "branch": "evolution/answer-lens-20260921",
+  "recorded_at": "2026-09-21T08:44:05.424574+00:00",
+  "material_change": "Current same-collection v2 executable prototype, strict preview namespaces and reproducible sync/check. No new root workflow feature or behavioral change; the invalid favicon asset was repaired.",
+  "root_application_logic_html_css_worker_unchanged": true,
+  "root_runtime_sha256": {
+    "index.html": "76c0a3d97ef64586b4ffe353fc6a053dfb2a0c0f8d8b24e6412dc5498b32b22a",
+    "styles.css": "5fc5dd9bad5ca69f030c49a4b4491c85337dec4c2f9771bc2d89164a3e6230b3",
+    "sw.js": "9aa9231023babbb9d8e16db56e97823d9942a476cd02ffaef3365c75a5eb4289",
+    "src/app.js": "760858511ea4157532d395a64021fc16697c22df0f529f55f000df49efcf44d7",
+    "src/core.js": "0bb27ea410403d05bc196629123ef7c76763bacda29bcaf2c33c51212fda5ab5",
+    "src/storage.js": "393609869a13a7bece42f5f6d8e8dbf088614485413d3037a8bb6ff4f4a49339",
+    "src/demo.js": "5303e108056c026a36a67a88dc03a51cf4b5bed36ee284a29db221503de28903",
+    "src/output.js": "fdd470fa8807309450b066463da31da4b11c82e5be52abd71ad2ee3e865f816d"
+  },
+  "root_stress_finding": "No additional material defect identified in the exercised journeys. This is bounded review, not a proof of absence of all defects.",
+  "historical_images_and_videos_unchanged": 19,
+  "tests": [
+    {
+      "command": "node --permission --allow-fs-read=. scripts/run-gates.mjs",
+      "exit_code": 0,
+      "tests": 59,
+      "pass": 59,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 138.5131,
+      "raw_receipt": "evidence/round3/gates-final.local.txt",
+      "receipt_sha256": "15199b6ae51c30878d4166399a17db4ded11ac540b6cb1399bd38884dd14293d"
+    },
+    {
+      "command": "node --test tests/server.test.mjs",
+      "exit_code": 0,
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 197.261975,
+      "raw_receipt": "evidence/round3/server-final.local.txt",
+      "receipt_sha256": "dd5a13de74002503411d04b58804b2320fb1ed2ceabf9d8577b68b078ba5c384"
+    },
+    {
+      "command": "node --test --test-concurrency=1 tests/browser.test.mjs tests/evolution.browser.test.mjs tests/prototype.browser.test.mjs",
+      "exit_code": 0,
+      "tests": 41,
+      "pass": 41,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 53935.884774,
+      "raw_receipt": "evidence/round3/browser-final-with-assets.local.txt",
+      "receipt_sha256": "e37767f3ee5bc9c273e0a57e4d30366a4bd9dfd16982238adcee5e1456817895"
+    }
+  ],
+  "total_tests_passed": 105,
+  "browser": "151.0.7922.137",
+  "node": "v24.16.0",
+  "browser_observed_at": "2026-09-21T08:41:48.163Z",
+  "isolated_gate_scope": "Local Node built-ins and modules only; no network or subprocess APIs. Server/browser checks are separate.",
+  "test_unit_limits": {
+    "tasks_max": 512,
+    "memory_bytes": 4294967296,
+    "cpu_quota_us": 200000,
+    "cpu_period_us": 100000,
+    "scope": "New project-only temporary unit; no shared service policy changed."
+  },
+  "prototype_sync_check": {
+    "command": "node --permission --allow-fs-read=. scripts/sync-prototype.mjs --check",
+    "exit_code": 0,
+    "generated_files": 13
+  },
+  "collection_schema": {
+    "name": "colecao.v1.schema.json",
+    "sha256": "3fa877b8ece6830b54f6a945b8b8f64b1f3b477b0843c33a1e49fc65d10e7ea7",
+    "validation": "jsonschema.validate exited 0"
+  },
+  "favicon_repair": {
+    "old_sha256": "8c5ff781afa9303693d288e3878957cdaaaef1255580c3fb595de4b5eb9a4d93",
+    "new_sha256": "1ee8f4cf7d4dbb6162bce94f53852a6bb2b483b72a2e1b6e256607542e3ea9be",
+    "before_browser_regression_exit_code": 1,
+    "after_browser_decode": [
+      48,
+      48
+    ],
+    "scope": "Malformed six-byte favicon replaced by a valid local SVG; existing URL retained. Synchronization now rejects invalid UTF-8 rather than hashing lossy decoded text."
+  },
+  "prototype_source_tree_sha256": "4bd10f0eba1e98644e7a7b8305ad0280413808ca768b67ca763ec0233e4e6240",
+  "preview_isolation": {
+    "storageKey": "answer-lens.preview.session.v2",
+    "legacyKey": "answer-lens.preview.session.v1",
+    "lockName": "answer-lens-preview-device-v2"
+  },
+  "browser_evidence": {
+    "same_origin_root_and_preview": true,
+    "root_keys_untouched": true,
+    "root_web_lock_independent": true,
+    "preview_legacy_migration_explicit": true,
+    "all_three_aliases_tested_offline": true,
+    "page_errors": [],
+    "external_requests": [],
+    "non_get_requests": [],
+    "temporary_server_closed": true
+  },
+  "deterministic_demo": {
+    "two_runs_and_cmp_exit_code": 0,
+    "stdout_sha256": "d22757bd1df7a1996cb99b877dcd2a7cc4b3f10d156f19d80edc31b789b9a276"
+  },
+  "prototype_captures": [
+    {
+      "path": "docs/design_refs/answer-lens/captures/round3-desktop-reading.png",
+      "sha256": "4146b8bbf79bfd51ef40132e8fb4279dd3a45c6529aa47a00a2053ade3553c2d",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "scenario": "Current v2 preview: full synthetic answers, isolated save and A/B/decision navigation.",
+      "fullPage": false,
+      "visually_inspected": true,
+      "observation": "Full synthetic answers are readable side by side; sources hidden; A/B/decision links visible and the decision controls have real behavior."
+    },
+    {
+      "path": "docs/design_refs/answer-lens/captures/round3-desktop-result.png",
+      "sha256": "85316ce37610618b910ba2623fa45dd37ce0ba45c2687b50a31015e3222aafe9",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "scenario": "Current v2 preview: locked verdict, copy actions, optional ratings and safe repeat-question action.",
+      "fullPage": true,
+      "visually_inspected": true,
+      "observation": "Visible preview isolation notice and saved state; synthetic label, locked verdict, copy/export/repeat controls and Not rated values read clearly."
+    },
+    {
+      "path": "docs/design_refs/answer-lens/captures/round3-copy-fallback.png",
+      "sha256": "cf59093304ded7d1b22a673ef990ab53253f0946ef62688a5a4683dd59f51061",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "scenario": "Clipboard denial produces selectable plain text, not an inert button.",
+      "fullPage": false,
+      "visually_inspected": true,
+      "observation": "Actual clipboard-denied state shows selected inert plain text, Select all text and the interpretation caveat; no success claim for a denied copy."
+    },
+    {
+      "path": "docs/design_refs/answer-lens/captures/round3-mobile-reading.png",
+      "sha256": "ae780962d184faa8276f48f8757071689f194ad1581798859d5e8e18dabdcaed",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scenario": "Current v2 preview: full synthetic answers, isolated save and A/B/decision navigation.",
+      "fullPage": false,
+      "visually_inspected": true,
+      "observation": "390px full-answer reading retains Answer B context; navigation and text are not horizontally clipped."
+    },
+    {
+      "path": "docs/design_refs/answer-lens/captures/round3-mobile-result.png",
+      "sha256": "68d4492f4996d1333968cfa3eee0383cb084037bef068e606742afbfecb7592d",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scenario": "Current v2 preview: locked verdict, copy actions, optional ratings and safe repeat-question action.",
+      "fullPage": true,
+      "visually_inspected": true,
+      "observation": "390px result has readable stacked controls, preview notice, saved feedback and a clear distinction between omitted ratings and Not sure."
+    }
+  ],
+  "additional_root_visual_inspection": [
+    {
+      "path": "evidence/round3/root-captures/captures/evolution-mobile-320-enlarged.png",
+      "sha256": "08e0c659b189ed8910c1feec25c0951b83ae564d9ee72a7f0ff5d048ffe5b651",
+      "retention": "Ignored VPS evidence; not a replacement for historical repository media.",
+      "visually_inspected": true,
+      "observation": "At 320px with enlarged CSS text, the A/B/decision controls remain readable; the unfocused skip link does not overlap them. Full synthetic answer text and identity remain visible."
+    },
+    {
+      "path": "evidence/round3/root-captures/captures/evolution-save-failure.png",
+      "sha256": "d1fead134e826625b3d41cf1cc00933a163a3557dd32bbff666fff17d446f020",
+      "retention": "Ignored VPS evidence; not a replacement for historical repository media.",
+      "visually_inspected": true,
+      "observation": "The root result visibly reports Not saved despite reveal succeeding; Retry saving and nearby failure feedback remain distinct from ordinary workflow status."
+    },
+    {
+      "path": "evidence/round3/favicon.local.png",
+      "sha256": "3495f8907e95f29ffdabdf4cb9b2a70f31348b5d053f0b0bd357e666672fd723",
+      "retention": "Ignored VPS evidence of actual browser SVG decoding.",
+      "visually_inspected": true,
+      "observation": "The repaired 48px local SVG displays the two overlapping green lens shapes on the app palette; no blank or invalid-image placeholder."
+    }
+  ],
+  "model_evidence": {
+    "selected_ui_mode": "6 Pro",
+    "actual_execution_model_observed": null
+  },
+  "limitations": [
+    "Chrome-only actual browser and keyboard checks; no screen-reader, native browser-zoom, physical-device or cross-browser certification.",
+    "Preview keys/lock/cache isolate the supplied code, not arbitrary same-origin scripts. Local browser data remains unencrypted.",
+    "The current collection has been exercised locally; publishing/promotion and new video are independent executor actions."
+  ],
+  "publication_authorized": false
+}

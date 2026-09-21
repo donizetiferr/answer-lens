@@ -12,7 +12,8 @@ import { demoSession } from '../src/demo.js';
 import { legacySession, legacyJSON } from './fixtures/sessions.mjs';
 let server, browser, base;
 const errors = [], externalRequests = [], nonGetRequests = [], captures = [];
-const output = join(ROOT, 'docs/design_refs/answer-lens-evolution');
+// Committed round-2 pictures are historical receipts; normal test runs must not replace them.
+const output = join(ROOT, process.env.ANSWER_LENS_CAPTURE_DIR || 'evidence/evolution-root-captures');
 before(async () => {
   await mkdir(join(output, 'captures'), { recursive: true });
   server = createAppServer(); server.listen(0, '127.0.0.1'); await once(server, 'listening');

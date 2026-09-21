@@ -10,8 +10,8 @@ import { STORAGE_KEY } from '../src/storage.js';
 let browser, server, base;
 const errors = [], externalRequests = [], dataRequests = [];
 // Keep earlier captures intact; this revision writes its own browser evidence.
-const media = join(ROOT, 'evidence', 'evolution-regression-captures');
-const evidence = join(ROOT, 'evidence', 'evolution-regression');
+const media = join(ROOT, process.env.ANSWER_LENS_REGRESSION_MEDIA || 'evidence/evolution-regression-captures');
+const evidence = join(ROOT, process.env.ANSWER_LENS_REGRESSION_EVIDENCE || 'evidence/evolution-regression');
 before(async () => {
   await mkdir(media, { recursive: true }); await mkdir(evidence, { recursive: true });
   server = createAppServer(); server.listen(0, '127.0.0.1'); await once(server, 'listening'); base = `http://127.0.0.1:${server.address().port}`;

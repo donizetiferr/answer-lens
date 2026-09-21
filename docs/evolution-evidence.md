@@ -1,5 +1,7 @@
 # Answer Lens 2.0 — implementation and review evidence
 
+**Round-3 follow-up:** [Current isolated catalog prototype and stress review](prototype-evidence.md), with [actual verification](prototype-verification.json). The historical results and media below are preserved.
+
 Request: `answer-lens-evolution-20260921-round-2`. Delivery scope: **review branch only**, not a deployment, promotion or final acceptance. The canonical public repository is `donizetiferr/answer-lens`, verified through repository node ID `R_kgDOUKWmPA`. Base `origin/main` was `72bc7ab2bf672ff1cfc480a17c5f06597c85d020`. Work was isolated in branch `evolution/answer-lens-20260921`; the original main checkout and the separate compatibility repository were not edited.
 
 ## Plan and implementation

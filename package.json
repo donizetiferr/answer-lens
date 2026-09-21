@@ -13,8 +13,12 @@
     "test": "node scripts/run-gates.mjs",
     "demo": "node scripts/demo.mjs",
     "test:server": "node --test tests/server.test.mjs",
-    "test:browser": "node --test --test-concurrency=1 tests/browser.test.mjs tests/evolution.browser.test.mjs",
-    "test:all": "npm test && npm run test:server && npm run test:browser"
+    "test:browser": "node --test --test-concurrency=1 tests/browser.test.mjs tests/evolution.browser.test.mjs tests/prototype.browser.test.mjs",
+    "test:all": "npm test && npm run test:server && npm run test:browser",
+    "prototype:sync": "node scripts/sync-prototype.mjs --write",
+    "prototype:check": "node scripts/sync-prototype.mjs --check",
+    "prototype:serve": "node scripts/serve-prototype.mjs",
+    "test:prototype": "node --test tests/prototype.browser.test.mjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"

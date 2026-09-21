@@ -80,6 +80,19 @@ The recorded `mulberry32-first-draw-v1` seed/order algorithm is unchanged. Produ
 
 Limits remain: question 8,000 JavaScript string units; each answer 40,000; origin 120; reason 2,000; imported file 600,000 bytes. Long text still requires reading and local rendering work.
 
+## Current navigable catalog prototype
+
+The existing [Answer Lens collection](docs/design_refs/answer-lens/comparison.html) now runs this 2.0 application, not the old pilot. Its desktop journey declares 1440×1000; the [mobile entry](docs/design_refs/answer-lens/mobile.html) declares 390×844. The collection folder, comparison screen ID, journey ID and existing entry links remain stable.
+
+```sh
+node scripts/sync-prototype.mjs --check
+node scripts/serve-prototype.mjs
+```
+
+Open `http://127.0.0.1:4181/docs/design_refs/answer-lens/comparison.html` while that loopback-only server runs. Both entries support the actual local workflow. The preview has separate v2/v1 storage keys, a separate Web Lock and a scoped cache; it does not open the main application's saved comparison.
+
+After intentional runtime changes, `node scripts/sync-prototype.mjs --write` refreshes this same collection. The read-only check fails on drift and is included in the isolated Node gates. [Design documentation](docs/DESIGN.md) explains the exact adaptations; [round-3 evidence](docs/prototype-evidence.md) records full browser journeys and same-origin isolation. Earlier images and video remain unchanged; no new video or deployment is part of this round.
+
 ## Tests and evidence
 
 The pure gates and deterministic Node demo need **no installation, network, browser, server or child processes**:
