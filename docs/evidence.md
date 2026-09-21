@@ -2,7 +2,7 @@
 
 **Round-3 follow-up:** [Current isolated catalog prototype and stress review](prototype-evidence.md), with [actual verification](prototype-verification.json). The historical results and media below are preserved.
 
-**Current evolution review:** see [evolution-evidence.md](evolution-evidence.md) for the 2.0 branch, new journeys, tests and actual captures. The results below belong to v1. Its successful six-second native preview supersedes only the media-availability limitation of the earlier 18-second attempts; no new video was made for this evolution.
+**Current release:** version 2.0 is public on main. See [evolution-evidence.md](evolution-evidence.md) for its journeys and tests, and [final media provenance](../media/answer-lens-final-preview.json) for the 7.5-second preview captured and rendered after independent final product review. The results below belong to v1 and remain historical evidence.
 
 Job: `buildsignal-answer-lens-20260921`. The first implementation was delivered privately for independent review. The release review and smaller native preview below supersede that initial delivery boundary. This is not a model benchmark or a claim of scientific double blinding.
 

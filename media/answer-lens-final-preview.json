@@ -1,0 +1,34 @@
+{
+  "schema": "buildsignal-final-media-review/1",
+  "creative_release": {
+    "repository": "donizetiferr/answer-lens",
+    "code_sha": "1f035bfdc1f030f80f7e4e46873f7cb47fcc38d5",
+    "product_reviewed_at": "2026-09-21T14:34:30.5198967Z",
+    "rendered_at": "2026-09-21T14:52:13.761Z"
+  },
+  "media_sha256": "2f485cb18af862c250a7abed143d44c1bfdb927df2fbd8fd868992b4d22edd65",
+  "reviewed_at": "2026-09-21T14:55:17.744Z",
+  "studio_report_sha256": "6392d9c36cfee4856f5fbaf99ce10a2f5e96894c4108cc9411defd06008ccac3",
+  "studio_verification": "ARTIFACT_BYTES_AND_MAP_VERIFIED",
+  "render_job": "59635634-c627-4699-bb72-559111f10fc7",
+  "verify_job": "13e9e2f2-3c41-4807-991e-152c3c567a48",
+  "format": {
+    "codec": "h264",
+    "width": 864,
+    "height": 612,
+    "pixel_format": "yuv420p",
+    "fps": 24,
+    "duration": 7.5
+  },
+  "decoded_frames": [
+    1,
+    4,
+    6.5
+  ],
+  "visual_findings": [
+    "All three decoded scenes inspected: optional ratings, revealed Answer B with copyable note, next pair retaining the question.",
+    "Direct canonical URL and synthetic-example label visible in every frame.",
+    "Captioned screenshot sequence, not a continuous interaction recording or model benchmark."
+  ],
+  "product_url": "https://donizetiferr.github.io/answer-lens/"
+}

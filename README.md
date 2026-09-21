@@ -4,22 +4,22 @@
 
 A small, local-first English tool for comparing two AI answers. Bring one question and two answers, read the shuffled A/B pair with source names hidden, make your own decision, then reveal the origins. No model calls, automatic accuracy score, account, signup or tracking.
 
-## Evolution review candidate
+## Version 2.0
 
-This is the **2.0 review candidate** on `evolution/answer-lens-20260921`, based on `72bc7ab2bf672ff1cfc480a17c5f06597c85d020`. It has not been deployed or promoted to `main`. The public repository is [donizetiferr/answer-lens](https://github.com/donizetiferr/answer-lens); the [accepted live app](https://donizetiferr.github.io/answer-lens/) can still show the earlier workflow until independent acceptance.
+Version **2.0** is released on `main` after three additional review rounds and independent verification. Use the [live app](https://donizetiferr.github.io/answer-lens/) or inspect the [MIT source](https://github.com/donizetiferr/answer-lens). The reviewed runtime commit is `1f035bfdc1f030f80f7e4e46873f7cb47fcc38d5`.
 
 ![Actual new result with a locked personal verdict and copy actions](docs/design_refs/answer-lens-evolution/captures/evolution-desktop-result.png)
 
 [Reading and deciding](docs/design_refs/answer-lens-evolution/captures/evolution-desktop-reading.png) · [Mobile result](docs/design_refs/answer-lens-evolution/captures/evolution-mobile-result.png) · [Long answers on mobile](docs/design_refs/answer-lens-evolution/captures/evolution-mobile-390-long.png) · [Copy-permission fallback](docs/design_refs/answer-lens-evolution/captures/evolution-copy-fallback.png)
 
-These are real browser captures with synthetic examples and scripted test decisions, not a human preference study. The [screen plan, journeys and capture manifests](docs/design_refs/answer-lens-evolution/DESIGN.md) distinguish the v1 baseline from the new implementation. The [six-second v1 preview](media/answer-lens-preview.mp4) is historical; new video is deferred until independent acceptance.
+These are real browser captures with synthetic examples and scripted test decisions, not a human preference study. The [screen plan, journeys and capture manifests](docs/design_refs/answer-lens-evolution/DESIGN.md) distinguish the v1 baseline from the new implementation. The [current 7.5-second preview](media/answer-lens-final-preview.mp4) was captured and rendered after final product review; earlier previews remain as historical artifacts.
 
 ## Run locally
 
 The runtime is vanilla HTML, CSS and browser JavaScript: **no runtime dependency and no build step**. Node 22 or newer runs the included loopback-only server and tests.
 
 ```sh
-git clone --branch evolution/answer-lens-20260921 https://github.com/donizetiferr/answer-lens.git
+git clone https://github.com/donizetiferr/answer-lens.git
 cd answer-lens
 node scripts/serve.mjs
 ```
@@ -82,7 +82,7 @@ Limits remain: question 8,000 JavaScript string units; each answer 40,000; origi
 
 ## Current navigable catalog prototype
 
-Watch the [six-second v2 preview](https://donizetiferr.github.io/answer-lens/media/answer-lens-v2-preview.mp4): choose with optional ratings, copy a useful decision note, then keep your question for another pair. It uses real app screens and labelled synthetic examples. [Media provenance](media/answer-lens-v2-preview.json).
+Watch the [current 7.5-second preview](https://donizetiferr.github.io/answer-lens/media/answer-lens-final-preview.mp4): choose with optional ratings, copy a useful decision note, then keep your question for another pair. It uses real app screens and labelled synthetic examples, captured after final review. [Media provenance](media/answer-lens-final-preview.json).
 
 The existing [Answer Lens collection](docs/design_refs/answer-lens/comparison.html) now runs this 2.0 application, not the old pilot. Its desktop journey declares 1440×1000; the [mobile entry](docs/design_refs/answer-lens/mobile.html) declares 390×844. The collection folder, comparison screen ID, journey ID and existing entry links remain stable.
 
