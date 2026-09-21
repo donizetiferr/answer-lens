@@ -21,3 +21,21 @@ CHECKPOINT.local.md
 
 # The README demo output is generated locally, not a source asset.
 /result.json
+
+# Never publish local credentials, databases, browser state or operational logs.
+.state/
+.ssh/
+.aws/
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite*
+*.db
+*.sql
+*.log
+cookies*.json
+storage-state*.json
+storageState*.json
+credentials*.json
+
