@@ -11,15 +11,15 @@
   <script type="module" src="./src/app.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to comparison</a>
+  <a data-acao="scroll-main" class="skip-link" href="#main">Skip to comparison</a>
   <header class="site-header wrap">
-    <a class="brand" href="#main" aria-label="Answer Lens — back to the top"><span class="lens-mark" aria-hidden="true"></span><span>Answer Lens<small>A little less brand bias.</small></span></a>
-    <div class="header-meta"><span class="local-badge"><span aria-hidden="true">●</span> Local by design</span><button type="button" id="reset-button" class="button quiet">Reset</button></div>
+    <a data-acao="scroll-main" class="brand" href="#main" aria-label="Answer Lens — back to the top"><span class="lens-mark" aria-hidden="true"></span><span>Answer Lens<small>A little less brand bias.</small></span></a>
+    <div class="header-meta"><span class="local-badge"><span aria-hidden="true">●</span> Local by design</span><button data-acao="reset-button" type="button" id="reset-button" class="button quiet">Reset</button></div>
   </header>
   <aside class="notice wrap" aria-label="Isolated catalog preview"><strong>Isolated preview</strong> · This is the working app with separate demo storage. It never opens the main app’s saved comparison. Saving and reset apply only to this preview.</aside>
   <main id="main" class="wrap" tabindex="-1">
     <noscript><div class="notice">Answer Lens needs JavaScript to shuffle answers and record your verdict. It does not send your text to a server.</div></noscript>
-    <section class="device-status" aria-label="Comparison saving"><p id="data-status" role="status" aria-live="polite"></p><button id="save-retry" class="button secondary" type="button" hidden>Retry saving</button></section>
+    <section class="device-status" aria-label="Comparison saving"><p id="data-status" role="status" aria-live="polite"></p><button data-acao="save-retry" id="save-retry" class="button secondary" type="button" hidden>Retry saving</button></section>
     <div id="app"></div>
     <p id="status" class="status" role="status" aria-live="polite"></p>
     <p id="error" class="error" role="alert" tabindex="-1" hidden></p>
@@ -32,7 +32,7 @@
   <dialog id="reset-dialog" aria-labelledby="reset-heading" aria-describedby="reset-description">
     <h2 id="reset-heading">Clear this comparison?</h2>
     <p id="reset-description">This removes the question, answers, ratings, and saved comparison from this app. Downloaded result files and the offline app cache stay on your device.</p>
-    <div class="actions"><button id="cancel-reset" class="button secondary" type="button" autofocus>Keep comparing</button><button id="confirm-reset" class="button primary" type="button">Clear comparison</button></div>
+    <div class="actions"><button data-acao="cancel-reset" id="cancel-reset" class="button secondary" type="button" autofocus>Keep comparing</button><button data-acao="confirm-reset" id="confirm-reset" class="button primary" type="button">Clear comparison</button></div>
   </dialog>
 </body>
 </html>

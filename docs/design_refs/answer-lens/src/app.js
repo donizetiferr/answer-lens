@@ -16,6 +16,9 @@ function el(tag, attrs = {}, ...children) {
   for (const child of children.flat(Infinity)) if (child !== null && child !== undefined) {
     node.append(child instanceof Node ? child : document.createTextNode(String(child)));
   }
+  if (tag === 'button' || (tag === 'a' && String(attrs.href || '').startsWith('#'))) {
+    node.dataset.acao = attrs.id || (tag === 'a' ? 'scroll-comparison' : 'comparison-action');
+  }
   return node;
 }
 const loaded = loadLocal();

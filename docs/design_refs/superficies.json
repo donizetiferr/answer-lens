@@ -1,0 +1,89 @@
+{
+  "versao": 1,
+  "superficies": [
+    {
+      "id": "answer-lens-desktop-preparacao",
+      "canal": "web",
+      "rota": "comparison.html#preparacao",
+      "estado": "preparacao",
+      "artefato": "answer-lens/comparison.html"
+    },
+    {
+      "id": "answer-lens-desktop-leitura-cega-e-decisao",
+      "canal": "web",
+      "rota": "comparison.html#leitura-cega-e-decisao",
+      "estado": "leitura-cega-e-decisao",
+      "artefato": "answer-lens/comparison.html"
+    },
+    {
+      "id": "answer-lens-desktop-resultado-e-copia",
+      "canal": "web",
+      "rota": "comparison.html#resultado-e-copia",
+      "estado": "resultado-e-copia",
+      "artefato": "answer-lens/comparison.html"
+    },
+    {
+      "id": "answer-lens-desktop-novo-par",
+      "canal": "web",
+      "rota": "comparison.html#novo-par",
+      "estado": "novo-par",
+      "artefato": "answer-lens/comparison.html"
+    },
+    {
+      "id": "answer-lens-desktop-importacao",
+      "canal": "web",
+      "rota": "comparison.html#importacao",
+      "estado": "importacao",
+      "artefato": "answer-lens/comparison.html"
+    },
+    {
+      "id": "answer-lens-desktop-salvamento-e-conflito",
+      "canal": "web",
+      "rota": "comparison.html#salvamento-e-conflito",
+      "estado": "salvamento-e-conflito",
+      "artefato": "answer-lens/comparison.html"
+    },
+    {
+      "id": "answer-lens-mobile-preparacao",
+      "canal": "web",
+      "rota": "mobile.html#preparacao",
+      "estado": "preparacao",
+      "artefato": "answer-lens/mobile.html"
+    },
+    {
+      "id": "answer-lens-mobile-leitura-cega-e-decisao",
+      "canal": "web",
+      "rota": "mobile.html#leitura-cega-e-decisao",
+      "estado": "leitura-cega-e-decisao",
+      "artefato": "answer-lens/mobile.html"
+    },
+    {
+      "id": "answer-lens-mobile-resultado-e-copia",
+      "canal": "web",
+      "rota": "mobile.html#resultado-e-copia",
+      "estado": "resultado-e-copia",
+      "artefato": "answer-lens/mobile.html"
+    },
+    {
+      "id": "answer-lens-mobile-novo-par",
+      "canal": "web",
+      "rota": "mobile.html#novo-par",
+      "estado": "novo-par",
+      "artefato": "answer-lens/mobile.html"
+    },
+    {
+      "id": "answer-lens-mobile-importacao",
+      "canal": "web",
+      "rota": "mobile.html#importacao",
+      "estado": "importacao",
+      "artefato": "answer-lens/mobile.html"
+    },
+    {
+      "id": "answer-lens-mobile-salvamento-e-conflito",
+      "canal": "web",
+      "rota": "mobile.html#salvamento-e-conflito",
+      "estado": "salvamento-e-conflito",
+      "artefato": "answer-lens/mobile.html"
+    }
+  ]
+}

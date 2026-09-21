@@ -23,8 +23,8 @@
     ],
     "versaoDoProduto": "2.0.0",
     "fonteDaVersao": {
-      "arquivo": "resources.json",
-      "campo": "appVersion"
+      "arquivo": "package.json",
+      "campo": "version"
     }
   },
   "padrao": {
@@ -54,20 +54,7 @@
         "src/core.js",
         "src/storage.js",
         "src/demo.js",
-        "src/output.js",
-        "resources.json"
-      ],
-      "cenarios": [
-        {
-          "id": "read-decide-copy-repeat",
-          "titulo": "Ler, decidir, copiar e repetir",
-          "descricao": "Demonstração sintética, veredito obrigatório, notas opcionais, nomes após revelar, cópia ou alternativa em texto e próximo par conservando só a pergunta."
-        },
-        {
-          "id": "isolated-save",
-          "titulo": "Salvar sem acessar o aplicativo real",
-          "descricao": "Chaves v2, legado v1, lock e cache próprios do preview. Nenhum dado real é carregado automaticamente."
-        }
+        "src/output.js"
       ],
       "dispositivo": "desktop"
     },
@@ -85,20 +72,7 @@
         "src/core.js",
         "src/storage.js",
         "src/demo.js",
-        "src/output.js",
-        "resources.json"
-      ],
-      "cenarios": [
-        {
-          "id": "read-decide-copy-repeat",
-          "titulo": "Ler, decidir, copiar e repetir",
-          "descricao": "Demonstração sintética, veredito obrigatório, notas opcionais, nomes após revelar, cópia ou alternativa em texto e próximo par conservando só a pergunta."
-        },
-        {
-          "id": "isolated-save",
-          "titulo": "Salvar sem acessar o aplicativo real",
-          "descricao": "Chaves v2, legado v1, lock e cache próprios do preview. Nenhum dado real é carregado automaticamente."
-        }
+        "src/output.js"
       ],
       "idTela": "answer-lens:comparison-mobile",
       "titulo": "Comparar, escolher e revelar — celular",

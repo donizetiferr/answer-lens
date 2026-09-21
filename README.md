@@ -82,6 +82,8 @@ Limits remain: question 8,000 JavaScript string units; each answer 40,000; origi
 
 ## Current navigable catalog prototype
 
+Watch the [six-second v2 preview](https://donizetiferr.github.io/answer-lens/media/answer-lens-v2-preview.mp4): choose with optional ratings, copy a useful decision note, then keep your question for another pair. It uses real app screens and labelled synthetic examples. [Media provenance](media/answer-lens-v2-preview.json).
+
 The existing [Answer Lens collection](docs/design_refs/answer-lens/comparison.html) now runs this 2.0 application, not the old pilot. Its desktop journey declares 1440×1000; the [mobile entry](docs/design_refs/answer-lens/mobile.html) declares 390×844. The collection folder, comparison screen ID, journey ID and existing entry links remain stable.
 
 ```sh

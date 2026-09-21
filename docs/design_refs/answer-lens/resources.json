@@ -22,21 +22,22 @@
     "HTML aliases index.html, comparison.html and mobile.html all run the same root app, with a visible isolated-preview notice.",
     "Only the three constants STORAGE_KEY, LEGACY_KEY and LOCK_NAME differ in storage.js. Preview never reads, writes or removes the production keys.",
     "The service worker has a preview-only cache prefix/version and caches all three HTML entry points within its own scope.",
-    "app.js, core.js, output.js, demo.js, CSS and icon bytes otherwise match the root app. No additional runtime dependency."
+    "HTML and app.js add data-acao declarations to existing local buttons and fragment links for the catalog viewer; handlers and behavior are unchanged.",
+    "core.js, output.js, demo.js, CSS and icon bytes otherwise match the root app. resources.json is build metadata, not a runtime resource. No additional runtime dependency."
   ],
   "generatedHashes": {
-    "index.html": "01354150b18e47aed41956a085dcdf5d5aad978486b9053e18e1a8778f159c77",
+    "index.html": "427a9e72a3307bfb76b64199cdfcf87481f22b449689a6715b5a51f2acb342a3",
     "styles.css": "5fc5dd9bad5ca69f030c49a4b4491c85337dec4c2f9771bc2d89164a3e6230b3",
     "icon.svg": "1ee8f4cf7d4dbb6162bce94f53852a6bb2b483b72a2e1b6e256607542e3ea9be",
-    "sw.js": "e7e1b45416665f9cdf94f70ff6a6cc6254943cb1c30d329c29aa5615f95bfa77",
-    "src/app.js": "760858511ea4157532d395a64021fc16697c22df0f529f55f000df49efcf44d7",
+    "sw.js": "db2eced67ed758f51825a6e4d1c3001bce9c22f8f1d187af496eb955d81621d3",
+    "src/app.js": "e3148c4d20cd10d06d37c195950a025b40cdc7ff6f7b8fc8c11fd760e5295dda",
     "src/core.js": "0bb27ea410403d05bc196629123ef7c76763bacda29bcaf2c33c51212fda5ab5",
     "src/storage.js": "6952b62ca69fd46292098a4c05170597447a6f00a4d6be1ca57b6b392d8ce706",
     "src/demo.js": "5303e108056c026a36a67a88dc03a51cf4b5bed36ee284a29db221503de28903",
     "src/output.js": "fdd470fa8807309450b066463da31da4b11c82e5be52abd71ad2ee3e865f816d",
-    "comparison.html": "01354150b18e47aed41956a085dcdf5d5aad978486b9053e18e1a8778f159c77",
-    "mobile.html": "01354150b18e47aed41956a085dcdf5d5aad978486b9053e18e1a8778f159c77",
-    "prancheta.json": "a81d5c3b19b709a26b9f3fd874de663c31576f1c691742e1f5387f6711bc0dc8"
+    "comparison.html": "427a9e72a3307bfb76b64199cdfcf87481f22b449689a6715b5a51f2acb342a3",
+    "mobile.html": "427a9e72a3307bfb76b64199cdfcf87481f22b449689a6715b5a51f2acb342a3",
+    "prancheta.json": "34652c944b429619f1e10d5ce5c580faa853252f4a764069d49cb9a936a11b54"
   },
   "hashScope": "All generated files except this self-describing manifest. Source hashes bind current root bytes; no Git or wall-clock input is required."
 }

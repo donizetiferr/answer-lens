@@ -1,0 +1,22 @@
+{
+  "schema": "answer-lens-media-provenance/1",
+  "title": "Answer Lens v2 — choose, keep a note, try another pair",
+  "file": "answer-lens-v2-preview.mp4",
+  "sha256": "091eb97c974d3946bdfb26b69810bdae304b3985d8e40adfd042ee27b483510a",
+  "bytes": 126870,
+  "durationSeconds": 6,
+  "width": 864,
+  "height": 612,
+  "fps": 24,
+  "codec": "h264",
+  "audio": false,
+  "format": "Three actual app screenshots, two seconds each, with English captions",
+  "capturedFromCommit": "78a25c0caba6c6553845cbcb30b5b3bbaf0e8626",
+  "examples": "Synthetic, labelled in every frame; not a model benchmark",
+  "renderer": "DoniStudio native edit_graph",
+  "nativePlanSha256": "826c609da944bbb7b92a699dc8c49e21d9d7549aa4efe21b9631515af7559f72",
+  "nativeReportSha256": "d3e26ea2bddfa09773af44b9a94a04fcff2edfe54f0ced652c446e2b40f5c30e",
+  "independentReview": "Decoded frames at 1s, 3s and 5s inspected; optional ratings, decision-note actions and question-only continuation are real app states. Captioned screenshot sequence, not a continuous screen recording.",
+  "rights": "Original project UI and owner-authorized synthetic examples; DejaVu Sans captions.",
+  "priorMedia": "answer-lens-preview.mp4 remains the original v1 demonstration with its original bytes."
+}

@@ -11,7 +11,7 @@ The stable `comparison.html` entry, journey ID **`compare`**, screen ID **`answe
 | Read, decide, copy and repeat — desktop | [comparison.html](design_refs/answer-lens/comparison.html) | 1440×1000 | `desktop` |
 | Read, decide, copy and repeat — mobile | [mobile.html](design_refs/answer-lens/mobile.html) | 390×844 | `smartphone` |
 
-Both entries start in preparation. Load the clearly labelled synthetic demo or enter a question and two answers. Full-answer navigation, optional ratings, required verdict/focus, immutable reveal, copying with selectable-text fallback, real JSON export/import, reset, same-question continuation and optional device saving are functional. The metadata declares scenarios; it does not claim unimplemented controls.
+Both entries start in preparation. Load the clearly labelled synthetic demo or enter a question and two answers. Full-answer navigation, optional ratings, required verdict/focus, immutable reveal, copying with selectable-text fallback, real JSON export/import, reset, same-question continuation and optional device saving are functional. The catalog exposes these actual journeys; no synthetic scenario selector is declared without a handler. The coverage inventory is `docs/design_refs/superficies.json`.
 
 Run from the repository root:
 
@@ -35,7 +35,7 @@ The visible **Isolated preview** notice is deliberate. Root and prototype can sh
 
 Only the three storage/lock constants differ in the preview storage module. The preview neither reads nor writes the real application's keys. Legacy migration, when a preview-specific v1 record exists, only reads that preview record and still requires explicit opening and separate saving consent. It never automatically imports a saved comparison from the main app.
 
-The three HTML entries receive the same visible preview notice. The service worker receives a preview-specific cache namespace/version and caches all three HTML aliases in its own directory. Its scope cannot control the root app. The app, core, output and demo modules, stylesheet and icon otherwise match the root bytes. No external scripts, fonts, accounts or network service are added.
+The three HTML entries receive the same visible preview notice. Existing buttons and fragment links receive `data-acao` declarations, including dynamic controls created by the preview's DOM factory; their existing handlers remain unchanged. The service worker receives a preview-specific cache namespace/version and caches all three HTML aliases in its own directory. Its scope cannot control the root app. The core, output and demo modules, stylesheet and icon otherwise match the root bytes. No external scripts, fonts, accounts or network service are added. Product version metadata reads the root `package.json`; `resources.json` is a build manifest rather than a runtime fixture.
 
 This is isolation enforced by the supplied application code, not separate-origin security against arbitrary code running on the same origin. Storage is still unencrypted. A visitor who explicitly selects a result JSON is choosing to open that file locally in the preview.
 

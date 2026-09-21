@@ -61,6 +61,9 @@ const choose = (page, name, value) => page.locator(`label:has(input[name="${name
 const saved = page => page.waitForFunction(() => document.querySelector('#data-status').dataset.state === 'saved');
 const reset = async page => { await page.click('#reset-button'); await page.click('#confirm-reset'); await page.waitForSelector('#question'); await page.waitForFunction(() => document.querySelector('#data-status').dataset.state === 'tab'); };
 async function capture(page, name, scenario, fullPage = false) {
+  assert.deepEqual(await page.locator('button,a[href^="#"]').evaluateAll(nodes =>
+    nodes.filter(node => !node.dataset.acao).map(node => node.id || node.textContent)), [],
+  'Catalog controls must declare their existing local actions in every exercised state');
   const file = `round3-${name}.png`; const path = join(OUT, file); await page.screenshot({ path, fullPage });
   captures.push({ path: relative(ROOT, path).split(sep).join('/'), sha256: createHash('sha256').update(await readFile(path)).digest('hex'), viewport: page.viewportSize(), scenario, fullPage });
 }
