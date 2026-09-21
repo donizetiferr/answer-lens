@@ -1,0 +1,118 @@
+{
+  "schema": "answer-lens-visual-review/1",
+  "reviewed_at": "2026-09-21T07:50:11.412588+00:00",
+  "method": "The assistant opened each of these final PNG files through Doni MCP read_file and inspected the displayed image; not inferred from screenshot capture or a test exit code.",
+  "scope": "Implementation self-review only, not independent acceptance, screen-reader certification or release approval.",
+  "publication_authorized": false,
+  "baseline_status": "Two baseline images were captured before editing; not included in this final visual review.",
+  "captures": [
+    {
+      "path": "captures/evolution-desktop-prepare.png",
+      "sha256": "59664485b0984638221623b18a27d79cefeba8ae6f4001d5d0d122729a6e41fc",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "observation": "Inspected populated synthetic editor, source fields, save-off status and existing two-card layout. No clipped main action or fabricated output."
+    },
+    {
+      "path": "captures/evolution-desktop-reading.png",
+      "sha256": "baaba9a6880f6a5c99809fc4170da23a72d890dd57c77bdeeea39d59664a1ec3",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "observation": "Inspected full side-by-side answers with source-hidden labels, A/B/decision navigation, verdict controls and collapsed optional ratings; no literal null artifact."
+    },
+    {
+      "path": "captures/evolution-desktop-result.png",
+      "sha256": "4d40bb77b8eba56e0ee4eaf7f7255941cedd4b217bbbe293d96de2b2460379fb",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "observation": "Inspected locked synthetic result, separate copy/export/repeat actions, both revealed source names and Not rated values; clear distinction from verified accuracy."
+    },
+    {
+      "path": "captures/evolution-mobile-result.png",
+      "sha256": "1af1fec553ad7374c10c365b1af4c238d11633b0213ff63e3def9cbaf3fe690f",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "observation": "Inspected full 390px result: stacked answer cards, full-width actions, wrapped caveats and visible persistence feedback; no horizontal clipping observed."
+    },
+    {
+      "path": "captures/evolution-copy-fallback.png",
+      "sha256": "9070eee00c09f57c60f75a161c3fddb9e8353323db45838d415b32ea0dac8adb",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "observation": "Inspected readonly selected plain-text decision note with visible manual copy instructions and Select all text control; result remains on screen."
+    },
+    {
+      "path": "captures/evolution-mobile-390-long.png",
+      "sha256": "c0ff474d00bd86b61e47b9941e0c922ca8f9b13c76667162c42084370ab8a174",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "observation": "Inspected scrolled long answer at 390px; source-hidden B header remains below A/B/decision navigation and body text stays readable."
+    },
+    {
+      "path": "captures/evolution-mobile-390-decision.png",
+      "sha256": "912ca051f19cec349a34303cb27271447d7eb60a7a8a04beb6a4453bf07ec6da",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "observation": "Inspected answer-specific optional metric labels, Not sure selection, Clear optional ratings and lock action at 390px."
+    },
+    {
+      "path": "captures/evolution-mobile-320-long.png",
+      "sha256": "919414abba0494675563cb5760edb3af788ee938ee75b4fe54fd68af59bda19a",
+      "viewport": {
+        "width": 320,
+        "height": 760
+      },
+      "observation": "Inspected 320px long-answer reading with persistent B identity and wrapped full text; no visible horizontal overflow."
+    },
+    {
+      "path": "captures/evolution-mobile-320-decision.png",
+      "sha256": "bd2e8bc9f1eb2b182f3bfc0f9e99e772e680aeea300a2f37e8c95c70594ac9c5",
+      "viewport": {
+        "width": 320,
+        "height": 760
+      },
+      "observation": "Inspected 320px optional rating controls in the wider three-column arrangement, clear-ratings action and lock button. Screenshot is scrolled, not the whole form."
+    },
+    {
+      "path": "captures/evolution-mobile-320-enlarged.png",
+      "sha256": "08e0c659b189ed8910c1feec25c0951b83ae564d9ee72a7f0ff5d048ffe5b651",
+      "viewport": {
+        "width": 320,
+        "height": 760
+      },
+      "observation": "Inspected 320px with CSS root text at 200%: navigation reflows into two rows without splitting short words; the unfocused skip link no longer overlays navigation. Reading uses more vertical space, intentionally."
+    },
+    {
+      "path": "captures/evolution-repeat-question.png",
+      "sha256": "61b3b9402c566af039933c6d685f2472bc0458d1af13be67615549fc8b399cce",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "observation": "Inspected confirmed next-pair screen: question retained, answer/source inputs blank, saving off and no carried synthetic notice."
+    },
+    {
+      "path": "captures/evolution-save-failure.png",
+      "sha256": "d1fead134e826625b3d41cf1cc00933a163a3557dd32bbff666fff17d446f020",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "observation": "Inspected red persistent Not saved notice and Retry saving above a revealed result, with matching nearby save feedback despite checked consent."
+    }
+  ]
+}

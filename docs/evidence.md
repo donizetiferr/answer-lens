@@ -1,4 +1,6 @@
-# Build and verification evidence
+# Historical v1 build and verification evidence
+
+**Current evolution review:** see [evolution-evidence.md](evolution-evidence.md) for the 2.0 branch, new journeys, tests and actual captures. The results below belong to v1. Its successful six-second native preview supersedes only the media-availability limitation of the earlier 18-second attempts; no new video was made for this evolution.
 
 Job: `buildsignal-answer-lens-20260921`. The first implementation was delivered privately for independent review. The release review and smaller native preview below supersede that initial delivery boundary. This is not a model benchmark or a claim of scientific double blinding.
 
@@ -47,7 +49,7 @@ The following four new screenshots were opened and visually inspected in the res
 
 Earlier screenshots remain unchanged on the VPS. Only these four reviewed screenshots are selected for the repository. Other test captures and raw observations are retained locally, not labelled as separately inspected renders.
 
-## DoniStudio: exact remaining media limitation
+## Historical 18-second Studio attempts — superseded by the successful six-second preview
 
 The v071 agent guide, a fresh `ops.agent_interface catalog`, the current `ops.edit_graph contract`, and the native plan/frame/render/verify argument contracts were inspected. The catalog digest was `a328f29f628ee173a2e2f34a2dea17cbc5d067ccce7c5b221593225462516463`. Native rendering exists; the failed attempt is **not** evidence that a new production lacks a renderer.
 
@@ -63,13 +65,13 @@ The actual native command was the existing Studio environment's `python -m ops.e
 
 Before that terminal planner result, setup errors were reconciled: the interactive shell had no user D-Bus environment; system Python lacked Studio's dependencies; and an initially chosen 64-task cap left less than Studio's required 64-task headroom. The existing `.venv-studio` environment and a 256-task dedicated cap resolved those setup issues while preserving the requested 4 GiB / two-CPU caps. No media output existed before correcting those setup errors. No dependency was installed and no production service or policy was modified.
 
-No accepted `plan.json` or plan hash was produced. **Frame, render and verify were therefore not executed**, and there is no finished video or native caption render to claim as reviewed. No pilot was relabelled, no alternative encoder bypassed the budget, and no further creative revision was attempted after the budget refusal. The real software screenshots are the delivered media. English caption source assets and both project revisions remain on the VPS; they are not presented as verified video output.
+For these 18-second attempts, no accepted `plan.json` or plan hash was produced. **Frame, render and verify were therefore not executed for those attempts.** This is historical, not a current lack of native rendering: the separate successful six-second preview is recorded below. No pilot was relabelled, no alternative encoder bypassed the budget, and no further creative revision was attempted after the budget refusal. The real software screenshots were the delivered media at that earlier private checkpoint. English caption source assets and both project revisions remain on the VPS; they are not presented as verified video output.
 
 ## Local receipts and delivery boundary
 
 Raw receipts are retained under the workspace's ignored `evidence/` directory: `null-regression-before-v2.txt`, `gates-final-v2.txt`, `server-final-v2.txt`, `browser-final-v2.txt`, `demo-deterministic-v2.json`, `review-v2/browser-observations.json`, and `studio-plan-v2-bounded.local.txt`. The original media, revision metadata, private contract snapshots and transient logs are deliberately excluded from Git. The repository contains this narrow evidence summary, source/tests, MIT license, prior-art documentation and four inspected screenshots.
 
-The dedicated review-server job was stopped by its exact job ID. Integration tests close their own temporary loopback servers and isolated browser contexts. Git delivery is limited to `main` in the assigned private repository, without a force-push or visibility change. The remote commit must be checked independently after pushing; that post-push receipt lives outside the commit it verifies.
+The dedicated review-server job was stopped by its exact job ID. Integration tests close their own temporary loopback servers and isolated browser contexts. At the original private-delivery checkpoint, Git delivery was limited to `main`, without a force-push or visibility change by that build. Later publication/rename and this isolated evolution branch have separate authority and evidence. The remote commit must be checked independently after pushing; that post-push receipt lives outside the commit it verifies.
 
 ## Known limitations
 

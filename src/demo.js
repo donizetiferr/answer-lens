@@ -1,5 +1,5 @@
 import { emptySession } from './core.js';
-// Original, hand-written synthetic teaching examples. No model generated these in a measured run.
+// Original synthetic teaching examples, not measured model outputs.
 export function demoSession(remember = false) {
   return { ...emptySession(), remember, synthetic: true,
     question: 'My downloads folder is a mess. How can I tidy it in 15 minutes without accidentally deleting something important?',

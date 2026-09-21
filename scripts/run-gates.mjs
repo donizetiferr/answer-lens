@@ -3,3 +3,4 @@
 await import('../tests/core.test.mjs');
 await import('../tests/storage.test.mjs');
 await import('../tests/demo.test.mjs');
+await import('../tests/evolution.test.mjs');

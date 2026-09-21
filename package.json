@@ -1,6 +1,6 @@
 {
   "name": "answer-lens",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "A local, human-led blind comparison of two AI answers.",
   "type": "module",
@@ -13,7 +13,7 @@
     "test": "node scripts/run-gates.mjs",
     "demo": "node scripts/demo.mjs",
     "test:server": "node --test tests/server.test.mjs",
-    "test:browser": "node --test tests/browser.test.mjs",
+    "test:browser": "node --test --test-concurrency=1 tests/browser.test.mjs tests/evolution.browser.test.mjs",
     "test:all": "npm test && npm run test:server && npm run test:browser"
   },
   "devDependencies": {

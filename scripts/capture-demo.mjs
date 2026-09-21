@@ -1,4 +1,4 @@
-// Capture real interactions. This produces stills for a captioned walkthrough,
+// Capture real interactions as stills only; new video waits for independent acceptance. This produces stills for a captioned walkthrough,
 // not a continuous screen recording or a claim about human/model performance.
 import { chromium } from 'playwright';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
@@ -33,9 +33,10 @@ try {
   await page.locator('.question-card').evaluate(node => node.scrollIntoView({ block: 'start' }));
   if (await page.locator('.origin,input[id^="origin-"]').count()) throw new Error('Sources unexpectedly visible before reveal.');
   await capture('02-blind', 'Hide the names. The app shuffles A and B.', 'Clicked Hide names & compare; confirmed source fields are absent.');
+  await page.locator('#details-ratings > summary').click();
   for (const label of ['A', 'B']) for (const metric of ['usefulness', 'clarity', 'factualConfidence']) await choose(`${label}-${metric}`, metric === 'factualConfidence' ? 'unsure' : 4);
-  await page.locator('.rating-area').first().evaluate(node => node.scrollIntoView({ block: 'start' }));
-  await capture('03-ratings', 'Rate usefulness, clarity, and your own confidence.', 'Entered illustrative ratings; selected Not sure for factual confidence.');
+  await page.locator('.detail-rating-card').first().evaluate(node => node.scrollIntoView({ block: 'start' }));
+  await capture('03-ratings', 'Optional: rate usefulness, clarity, and your confidence.', 'Entered illustrative ratings; selected Not sure for factual confidence.');
   await choose('verdict', 'tie'); await page.fill('#note', 'Illustrative demo ratings only. Check important claims independently.');
   await page.locator('#verdict-form').evaluate(node => node.scrollIntoView({ block: 'center' }));
   await capture('04-verdict', 'Choose your verdict before seeing the sources.', 'Selected a tie and added a clearly illustrative note; no reveal yet.');

@@ -1,0 +1,26 @@
+{
+  "description": "Real baseline browser captures before evolution edits; synthetic demo.",
+  "capturedAt": "2026-09-21T07:06:35.922Z",
+  "captures": [
+    {
+      "path": "docs/design_refs/answer-lens-evolution/captures/baseline-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "phase": "blind",
+      "sourceCommit": "72bc7ab2bf672ff1cfc480a17c5f06597c85d020",
+      "sha256": "17dbc9910bae57d4e30bcd0d25408406a45d5710386b3ac229ade716e1b235ab"
+    },
+    {
+      "path": "docs/design_refs/answer-lens-evolution/captures/baseline-390.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "blind",
+      "sourceCommit": "72bc7ab2bf672ff1cfc480a17c5f06597c85d020",
+      "sha256": "ecb47ecc2dc5dcdd10b07fdd8e748963b057dbfa8c1614701f1aca9a9cd23c5c"
+    }
+  ]
+}

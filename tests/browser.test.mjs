@@ -10,8 +10,8 @@ import { STORAGE_KEY } from '../src/storage.js';
 let browser, server, base;
 const errors = [], externalRequests = [], dataRequests = [];
 // Keep earlier captures intact; this revision writes its own browser evidence.
-const media = join(ROOT, 'media', 'review-v2');
-const evidence = join(ROOT, 'evidence', 'review-v2');
+const media = join(ROOT, 'evidence', 'evolution-regression-captures');
+const evidence = join(ROOT, 'evidence', 'evolution-regression');
 before(async () => {
   await mkdir(media, { recursive: true }); await mkdir(evidence, { recursive: true });
   server = createAppServer(); server.listen(0, '127.0.0.1'); await once(server, 'listening'); base = `http://127.0.0.1:${server.address().port}`;
@@ -29,12 +29,15 @@ async function fixture(options = {}) {
   });
   context.on('page', page => page.on('pageerror', error => errors.push(error.message)));
   const page = await context.newPage();
+  page.on('dialog', dialog => dialog.accept());
   return { context, page };
 }
 async function open(page) { await page.goto(base); await page.waitForSelector('#demo-button'); }
 async function demo(page) { await open(page); await page.click('#demo-button'); }
 async function choose(page, name, value) { await page.locator(`label:has(input[name="${name}"][value="${value}"])`).click(); }
+async function saved(page) { await page.waitForFunction(() => document.querySelector('#data-status').dataset.state === 'saved'); }
 async function rate(page) {
+  if (!await page.locator('#details-ratings').evaluate(node => node.open)) await page.locator('#details-ratings > summary').click();
   for (const label of ['A', 'B']) for (const metric of ['usefulness', 'clarity', 'factualConfidence']) await choose(page, `${label}-${metric}`, metric === 'factualConfidence' ? 'unsure' : label === 'A' ? 4 : 3);
 }
 async function reveal(page, verdict = 'A') { await rate(page); await choose(page, 'verdict', verdict); await page.click('#reveal-button'); await page.waitForSelector('#export-button'); }
@@ -53,9 +56,10 @@ test('desktop demo works end to end; sources leak neither into DOM nor accessibi
     assert.equal(await page.locator('.origin').count(), 0);
     assert.equal(await page.locator('.hidden-origin').count(), 2);
     await page.screenshot({ path: join(media, 'desktop-blind.png'), fullPage: true });
-    await page.click('#reveal-button'); assert.match(await page.locator('#error').innerText(), /six/);
+    await page.click('#reveal-button'); assert.match(await page.locator('#verdict-error').innerText(), /Choose/);
+    assert.equal(await page.evaluate(() => document.activeElement.name), 'verdict');
     assert.equal(await page.locator('.origin').count(), 0);
-    await rate(page); await page.click('#reveal-button'); assert.match(await page.locator('#error').innerText(), /verdict/);
+    await rate(page); await page.click('#reveal-button'); assert.match(await page.locator('#verdict-error').innerText(), /Choose/);
     await choose(page, 'verdict', 'A'); await page.fill('#note', 'The steps were easier to act on. I would still check any important claim.');
     await page.click('#reveal-button'); await page.waitForSelector('#export-button');
     assert.equal(await page.locator('.origin').count(), 2);
@@ -105,7 +109,7 @@ test('local saving is opt-in; reload preserves the blind shuffle; reset clears o
   try {
     await demo(page); assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), null);
     await page.reload(); await page.waitForSelector('#question'); assert.equal(await page.inputValue('#question'), '');
-    await page.click('#demo-button'); await page.check('#remember'); await page.click('#begin-button'); await choose(page, 'A-clarity', 4);
+    await page.click('#demo-button'); await page.check('#remember'); await page.click('#begin-button'); await page.locator('#details-ratings > summary').click(); await choose(page, 'A-clarity', 4); await saved(page);
     const before = JSON.parse(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY));
     await page.reload(); await page.waitForSelector('#verdict-form');
     const after = JSON.parse(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY));
@@ -126,20 +130,24 @@ test('local saving is opt-in; reload preserves the blind shuffle; reset clears o
 test('opting out removes the saved pair while keeping the current tab usable', async () => {
   const { context, page } = await fixture();
   try {
-    await demo(page); await page.check('#remember'); assert.ok(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY));
-    await page.uncheck('#remember'); assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), null);
+    await demo(page); await page.check('#remember'); await saved(page); assert.ok(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY));
+    await page.uncheck('#remember'); await page.waitForFunction(key => localStorage.getItem(key) === null, STORAGE_KEY); assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), null);
     assert.notEqual(await page.inputValue('#question'), '');
   } finally { await context.close(); }
 });
 
-test('reset in one opted-in tab also clears the saved comparison in another', async () => {
+test('reset in one opted-in tab preserves another tab and pauses its saving', async () => {
   const { context, page } = await fixture();
   try {
-    await demo(page); await page.check('#remember'); await page.click('#begin-button');
+    await demo(page); await page.check('#remember'); await page.click('#begin-button'); await saved(page);
     const other = await context.newPage(); await other.goto(base); await other.waitForSelector('#verdict-form');
-    await reset(page); await other.waitForSelector('#question');
-    assert.equal(await other.inputValue('#question'), ''); assert.equal(await other.locator('#remember').isChecked(), false);
-    await other.fill('#question', 'New unsaved draft'); assert.equal(await other.evaluate(key => localStorage.getItem(key), STORAGE_KEY), null);
+    await other.locator('#note').focus();
+    await reset(page); await other.waitForFunction(() => document.querySelector('#data-status').dataset.state === 'conflict');
+    assert.equal(await other.locator('#verdict-form').count(), 1);
+    assert.equal(await other.evaluate(() => document.activeElement.id), 'note');
+    assert.equal(await other.locator('#remember').isChecked(), false);
+    await other.fill('#note', 'Preserved unsaved work');
+    assert.equal(await other.evaluate(key => localStorage.getItem(key), STORAGE_KEY), null);
   } finally { await context.close(); }
 });
 
@@ -152,7 +160,11 @@ test('keyboard users can use the skip link, begin comparison, change ratings and
     await page.locator('#demo-button').focus(); await page.keyboard.press('Space');
     await page.locator('#begin-button').focus(); await page.keyboard.press('Enter'); await page.waitForSelector('#verdict-form');
     await page.keyboard.press('Tab');
-    assert.equal(await page.evaluate(() => document.activeElement.name), 'A-usefulness');
+    assert.equal(await page.evaluate(() => document.activeElement.textContent), 'Answer A');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'answer-A');
+    await page.locator('#details-ratings > summary').focus(); await page.keyboard.press('Enter');
+    await page.locator('input[name="A-usefulness"][value="1"]').focus();
     await page.keyboard.press('ArrowRight'); assert.equal(await page.locator('input[name="A-usefulness"][value="2"]').isChecked(), true);
     await page.keyboard.press('ArrowLeft'); assert.equal(await page.locator('input[name="A-usefulness"][value="1"]').isChecked(), true);
     await page.locator('#reset-button').focus(); await page.keyboard.press('Enter');
@@ -170,7 +182,7 @@ test('mobile layout supports the full flow at 390px and has no horizontal overfl
     await demo(page); await noOverflow(); await page.screenshot({ path: join(media, 'mobile-setup.png'), fullPage: true });
     await page.click('#begin-button'); await noOverflow();
     await page.screenshot({ path: join(media, 'mobile-blind.png') });
-    await page.locator('.rating-area').first().scrollIntoViewIfNeeded(); await page.screenshot({ path: join(media, 'mobile-ratings.png') });
+    await page.locator('#details-ratings > summary').click(); await page.locator('.detail-rating-card').first().scrollIntoViewIfNeeded(); await page.screenshot({ path: join(media, 'mobile-ratings.png') });
     for (const box of await page.locator('.rating-option span').evaluateAll(nodes => nodes.map(node => ({ height: node.getBoundingClientRect().height })))) assert.ok(box.height >= 44);
     await page.setViewportSize({ width: 320, height: 760 }); await noOverflow();
     await page.setViewportSize({ width: 390, height: 844 }); await reveal(page, 'tie'); await noOverflow();
@@ -185,6 +197,7 @@ test('the saved app works after an actual offline reload and keeps non-app cache
     await demo(page); await page.check('#remember'); await page.click('#begin-button');
     await page.waitForFunction(() => navigator.serviceWorker.controller && document.querySelector('#offline-status').textContent.includes('Offline app ready'));
     await page.evaluate(() => caches.open('unrelated-offline-cache'));
+    await saved(page);
     const before = await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY);
     await context.setOffline(true); await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForSelector('#verdict-form');
     assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), before);
@@ -199,9 +212,9 @@ test('storage-blocked browsers can still compare without an unhandled exception'
   const { context, page } = await fixture();
   try {
     await context.addInitScript(() => Object.defineProperty(window, 'localStorage', { configurable: true, get() { throw new DOMException('Blocked for this test', 'SecurityError'); } }));
-    await demo(page); await page.check('#remember'); assert.match(await page.locator('#status').innerText(), /unavailable/);
+    await demo(page); await page.check('#remember'); await page.waitForFunction(() => document.querySelector('#data-status').dataset.state === 'failed'); assert.match(await page.locator('#data-status').innerText(), /unavailable/);
     await page.click('#begin-button'); await reveal(page, 'B'); assert.equal(await page.locator('.origin').count(), 2);
-    await reset(page); assert.match(await page.locator('#status').innerText(), /blocked deleting saved data/);
+    await reset(page); await page.waitForFunction(() => document.querySelector('#data-status').dataset.state === 'delete-failed'); assert.match(await page.locator('#data-status').innerText(), /blocked deleting saved data/);
   } finally { await context.close(); }
 });
 
@@ -210,8 +223,8 @@ test('corrupt saved state and invalid imported files give useful errors without 
   try {
     await open(page); await page.evaluate(key => localStorage.setItem(key, '{broken'), STORAGE_KEY);
     await page.reload(); await page.waitForSelector('#question');
-    assert.match(await page.locator('#status').innerText(), /removed/); assert.equal(await page.inputValue('#question'), '');
-    assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), null);
+    assert.match(await page.locator('#data-status').innerText(), /untouched/); assert.equal(await page.inputValue('#question'), '');
+    assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), '{broken');
     await page.setInputFiles('#import-file', { name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
     assert.match(await page.locator('#error').innerText(), /not an Answer Lens result/);
   } finally { await context.close(); }

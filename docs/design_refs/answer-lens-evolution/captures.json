@@ -1,0 +1,155 @@
+{
+  "schema": "answer-lens-screen-evidence/1",
+  "capturedAt": "2026-09-21T07:46:22.148Z",
+  "browser": "151.0.7922.137",
+  "node": "v24.16.0",
+  "sourceBase": "72bc7ab2bf672ff1cfc480a17c5f06597c85d020",
+  "runtimeHashes": {
+    "index.html": "76c0a3d97ef64586b4ffe353fc6a053dfb2a0c0f8d8b24e6412dc5498b32b22a",
+    "styles.css": "5fc5dd9bad5ca69f030c49a4b4491c85337dec4c2f9771bc2d89164a3e6230b3",
+    "sw.js": "9aa9231023babbb9d8e16db56e97823d9942a476cd02ffaef3365c75a5eb4289",
+    "src/app.js": "760858511ea4157532d395a64021fc16697c22df0f529f55f000df49efcf44d7",
+    "src/core.js": "0bb27ea410403d05bc196629123ef7c76763bacda29bcaf2c33c51212fda5ab5",
+    "src/storage.js": "393609869a13a7bece42f5f6d8e8dbf088614485413d3037a8bb6ff4f4a49339",
+    "src/output.js": "fdd470fa8807309450b066463da31da4b11c82e5be52abd71ad2ee3e865f816d",
+    "src/demo.js": "5303e108056c026a36a67a88dc03a51cf4b5bed36ee284a29db221503de28903"
+  },
+  "captures": [
+    {
+      "path": "captures/evolution-desktop-prepare.png",
+      "sha256": "59664485b0984638221623b18a27d79cefeba8ae6f4001d5d0d122729a6e41fc",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "phase": "setup",
+      "scenario": "Populated synthetic editor; device saving remains off.",
+      "fullPage": true
+    },
+    {
+      "path": "captures/evolution-desktop-reading.png",
+      "sha256": "baaba9a6880f6a5c99809fc4170da23a72d890dd57c77bdeeea39d59664a1ec3",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "phase": "blind",
+      "scenario": "Full synthetic answers; ratings optional and verdict still required.",
+      "fullPage": true
+    },
+    {
+      "path": "captures/evolution-desktop-result.png",
+      "sha256": "4d40bb77b8eba56e0ee4eaf7f7255941cedd4b217bbbe293d96de2b2460379fb",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "phase": "revealed",
+      "scenario": "Locked synthetic result with no invented ratings and useful copy/repeat actions.",
+      "fullPage": true
+    },
+    {
+      "path": "captures/evolution-mobile-result.png",
+      "sha256": "1af1fec553ad7374c10c365b1af4c238d11633b0213ff63e3def9cbaf3fe690f",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "revealed",
+      "scenario": "The complete new synthetic result on a 390px mobile viewport.",
+      "fullPage": true
+    },
+    {
+      "path": "captures/evolution-copy-fallback.png",
+      "sha256": "9070eee00c09f57c60f75a161c3fddb9e8353323db45838d415b32ea0dac8adb",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "phase": "revealed",
+      "scenario": "Denied clipboard permission; full selectable decision note, no upload.",
+      "fullPage": false
+    },
+    {
+      "path": "captures/evolution-mobile-390-long.png",
+      "sha256": "c0ff474d00bd86b61e47b9941e0c922ca8f9b13c76667162c42084370ab8a174",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "blind",
+      "scenario": "Actual unequal long plain-text answers; sticky B identity and A/B/decision navigation.",
+      "fullPage": false
+    },
+    {
+      "path": "captures/evolution-mobile-390-decision.png",
+      "sha256": "912ca051f19cec349a34303cb27271447d7eb60a7a8a04beb6a4453bf07ec6da",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "blind",
+      "scenario": "Optional answer-specific ratings and required verdict on a narrow viewport.",
+      "fullPage": false
+    },
+    {
+      "path": "captures/evolution-mobile-320-long.png",
+      "sha256": "919414abba0494675563cb5760edb3af788ee938ee75b4fe54fd68af59bda19a",
+      "viewport": {
+        "width": 320,
+        "height": 760
+      },
+      "phase": "blind",
+      "scenario": "Actual unequal long plain-text answers; sticky B identity and A/B/decision navigation.",
+      "fullPage": false
+    },
+    {
+      "path": "captures/evolution-mobile-320-decision.png",
+      "sha256": "bd2e8bc9f1eb2b182f3bfc0f9e99e772e680aeea300a2f37e8c95c70594ac9c5",
+      "viewport": {
+        "width": 320,
+        "height": 760
+      },
+      "phase": "blind",
+      "scenario": "Optional answer-specific ratings and required verdict on a narrow viewport.",
+      "fullPage": false
+    },
+    {
+      "path": "captures/evolution-mobile-320-enlarged.png",
+      "sha256": "08e0c659b189ed8910c1feec25c0951b83ae564d9ee72a7f0ff5d048ffe5b651",
+      "viewport": {
+        "width": 320,
+        "height": 760
+      },
+      "phase": "blind",
+      "scenario": "320px viewport with CSS root text enlarged to 200%; not a native screen-reader or browser-zoom certification.",
+      "fullPage": false
+    },
+    {
+      "path": "captures/evolution-repeat-question.png",
+      "sha256": "61b3b9402c566af039933c6d685f2472bc0458d1af13be67615549fc8b399cce",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "phase": "setup",
+      "scenario": "Confirmed next pair: only the question remains; old answer-specific data and saving consent are cleared.",
+      "fullPage": true
+    },
+    {
+      "path": "captures/evolution-save-failure.png",
+      "sha256": "d1fead134e826625b3d41cf1cc00933a163a3557dd32bbff666fff17d446f020",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "phase": "revealed",
+      "scenario": "Quota denial remains visible above the locked result; it is not replaced by reveal success.",
+      "fullPage": true
+    }
+  ],
+  "pageErrors": [],
+  "externalRequests": [],
+  "nonGetRequests": [],
+  "review": "Captured by actual Chrome interactions; visual inspection is recorded separately, never inferred from capture success."
+}

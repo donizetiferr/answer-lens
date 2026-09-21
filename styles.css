@@ -136,8 +136,8 @@ dialog { max-width:min(520px,calc(100% - 32px)); border:1px solid var(--line); b
 dialog::backdrop { background:#172f2970; }
 dialog p { color:var(--muted); font-size:.87rem; margin-top:14px; }
 .actions { display:flex; justify-content:flex-end; gap:12px; margin-top:26px; }
-.skip-link { position:fixed; top:-100px; left:20px; z-index:20; padding:12px 20px; background:var(--green); color:#fff; }
-.skip-link:focus { top:10px; }
+.skip-link { position:fixed; top:10px; left:20px; z-index:20; max-width:calc(100% - 40px); padding:12px 20px; background:var(--green); color:#fff; transform:translateY(calc(-100% - 20px)); }
+.skip-link:focus { transform:none; }
 @media (max-width:850px) {
   .wrap { width:calc(100% - 40px); }
   .hero { grid-template-columns:1fr 170px; gap:30px; }
@@ -196,3 +196,62 @@ dialog p { color:var(--muted); font-size:.87rem; margin-top:14px; }
 @media (forced-colors:active) { .rating-option input:checked+span,.verdict-option input:checked+span { border:3px solid Highlight; } }
 /* Keep the confidence scale endpoint under 5, not under the separate uncertainty option. */
 .rating-group:has(.unsure) .scale-ends { width:75%; }
+
+/* Evolution: full-answer reading, verdict-first flow and honest device status. */
+[hidden] { display:none !important; }
+.device-status { margin:0 0 24px; padding:12px 16px; border:1px solid var(--line); border-radius:8px; background:var(--surface); display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.device-status p { font-size:.82rem; line-height:1.6; flex:1; min-width:180px; }
+.device-status p[data-state="failed"],.device-status p[data-state="delete-failed"],.device-status p[data-state="conflict"],.device-status p[data-state="protected"] { color:var(--error); font-weight:600; }
+.device-status p[data-state="saved"] { color:var(--green); }
+.reader-nav { position:sticky; top:0; z-index:10; background:var(--paper); border-block:1px solid #b9c8ad; display:flex; gap:8px; padding:8px 0; margin:0 0 22px; }
+.reader-nav a { flex:1; min-width:0; display:flex; justify-content:center; align-items:center; text-align:center; min-height:44px; padding:8px 6px; font-size:.9rem; font-weight:650; border:1px solid var(--line); border-radius:7px; text-decoration:none; background:var(--surface); color:var(--green); }
+.reader-nav a:hover { background:var(--light); }
+.comparison-grid .answer-card { overflow:visible; }
+.comparison-grid .answer-heading { position:sticky; top:var(--reader-nav-height,62px); z-index:2; background:var(--surface); border-radius:11px 11px 0 0; }
+.answer-card,.verdict-group,#decision-title { scroll-margin-top:calc(var(--reader-nav-height,62px) + 18px); }
+.comparison-grid .answer-text { font-size:1rem; line-height:1.8; }
+.optional-ratings { margin:24px 0; border-block:1px solid #c8d2bb; padding:15px 0; }
+.optional-ratings summary { font-weight:650; cursor:pointer; min-height:44px; display:list-item; padding:10px 0; }
+.optional-ratings > p { margin:10px 0 18px; }
+.detail-rating-card { min-width:0; padding:18px; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+.detail-rating-card h3 { margin-bottom:18px; }
+.detail-rating-card .rating-group { margin-bottom:22px; }
+.detail-rating-card .rating-group:last-child { margin-bottom:0; }
+.result-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; }
+.copy-fallback { margin-top:22px; border-top:1px solid #c8d2bb; padding-top:18px; }
+.copy-fallback label { font-weight:650; display:block; margin-bottom:10px; }
+.copy-fallback textarea { display:block; margin:12px 0; font-size:1rem; width:100%; }
+.inline-error { color:var(--error); padding:10px 0; font-weight:650; font-size:.9rem; }
+.legacy-notice { padding:18px 0; border-top:1px solid var(--line); margin-top:16px; }
+.legacy-notice h2 { font-size:1.05rem; }
+.legacy-notice p { margin:10px 0 14px; }
+@media (max-width:640px) {
+  .device-status { padding:10px 12px; margin-bottom:18px; }
+  .device-status p { font-size:.8rem; }
+  .reader-nav { gap:6px; }
+  .reader-nav a { font-size:.82rem; padding-inline:4px; }
+  .comparison-grid .answer-text { padding:20px; font-size:1rem; }
+  .result-actions { gap:10px; }
+  .result-actions .button { width:100%; }
+  .detail-rating-card { padding:14px; }
+  .rating-group legend { font-size:.85rem; }
+}
+
+/* Do not hide overflow: allow progress labels to reflow with enlarged text. */
+.steps { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.steps li { min-width:0; flex-wrap:wrap; overflow-wrap:anywhere; }
+.steps li span { flex-shrink:0; }
+.reader-nav a { overflow-wrap:anywhere; }
+.rating-area { border-radius:0 0 11px 11px; }
+#clear-ratings { margin-top:18px; }
+#save-feedback { font-weight:650; }
+@media (max-width:380px) {
+  .detail-rating-card .rating-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .detail-rating-card .rating-option.unsure span { font-size:.75rem; }
+}
+
+@media (max-width:380px) {
+  /* At enlarged text sizes use another row rather than split short nav words. */
+  .reader-nav { flex-wrap:wrap; }
+  .reader-nav a { flex:1 1 4.5em; overflow-wrap:normal; }
+}

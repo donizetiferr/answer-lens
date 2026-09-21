@@ -71,8 +71,9 @@ test('ratings update immutably and a complete pair requires six judgments', () =
   assert.deepEqual(initial.ratings.A, {}); assert.equal(next.ratings.A.clarity, 4);
   assert.equal(ratingsComplete(next), false); assert.equal(ratingsComplete(rated()), true);
 });
-test('reveal is blocked without complete ratings and a specific verdict', () => {
-  assert.throws(() => lockAndReveal(blind(), 'A', '', later), /six/);
+test('reveal requires a specific verdict, not optional ratings', () => {
+  assert.equal(lockAndReveal(blind(), 'A', '', later).phase, 'revealed');
+  assert.throws(() => lockAndReveal(blind(), null, '', later), /verdict/);
   for (const verdict of [null, undefined, '', 'best model']) assert.throws(() => lockAndReveal(rated(), verdict, '', later), /verdict/);
 });
 test('all four verdicts are supported and origins appear only after lock', () => {
@@ -97,15 +98,15 @@ test('export is impossible during setup or blind comparison', () => {
 test('self-contained JSON roundtrip preserves full answers, ratings, mapping and verdict', () => {
   const session = result(); session.remember = true;
   const json = exportResult(session); const parsed = JSON.parse(json); const restored = importResult(json);
-  assert.equal(parsed.schema, 'answer-lens-result/1'); assert.deepEqual(parsed.caveats, [...CAVEATS]);
+  assert.equal(parsed.schema, 'answer-lens-result/2'); assert.deepEqual(parsed.caveats, [...CAVEATS]);
   assert.deepEqual(restored, { ...session, remember: false });
   assert.equal(exportResult(restored), json);
   assert.equal(parsed.assessment, 'human-self-report'); assert.equal('accuracyScore' in parsed, false);
 });
-test('tampered shuffle, incomplete ratings, wrong schema and malformed JSON are rejected', () => {
+test('tampered shuffle, invalid supplied ratings, wrong schema and malformed JSON are rejected', () => {
   const parsed = JSON.parse(exportResult(result()));
   parsed.comparison.randomization.order.reverse(); assert.throws(() => importResult(JSON.stringify(parsed)), /seed/);
-  const incomplete = result(); delete incomplete.ratings.A.clarity; assert.throws(() => validateSession(incomplete));
+  const invalid = result(); invalid.ratings.A.clarity = 9; assert.throws(() => validateSession(invalid));
   for (const json of ['{', '{}', 'null', '{"schema":"another-app"}', 'x'.repeat(LIMITS.json + 1)]) assert.throws(() => importResult(json));
 });
 test('saved phase invariants are enforced and unknown fields do not enter state', () => {

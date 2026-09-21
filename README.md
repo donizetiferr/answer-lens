@@ -1,106 +1,114 @@
 # Answer Lens
 
-**Judge the answer. Not the name.**
+**Judge the answer. Not the name. Then keep something useful.**
 
-A small English web tool for comparing two AI answers with their source names hidden until after your own verdict. Paste a question and two answers, read the shuffled A/B pair, rate it yourself, then reveal the names and keep a complete result JSON.
+A small, local-first English tool for comparing two AI answers. Bring one question and two answers, read the shuffled A/B pair with source names hidden, make your own decision, then reveal the origins. No model calls, automatic accuracy score, account, signup or tracking.
 
-**[Try Answer Lens in your browser](https://donizetiferr.github.io/answer-lens/)** · MIT licensed · No account or API key required.
+## Evolution review candidate
 
-[Watch the six-second preview](media/answer-lens-preview.mp4). It combines real app screenshots with labelled synthetic examples and English captions, rendered and verified with DoniStudio. It is a quick preview, not a model benchmark.
+This is the **2.0 review candidate** on `evolution/answer-lens-20260921`, based on `72bc7ab2bf672ff1cfc480a17c5f06597c85d020`. It has not been deployed or promoted to `main`. The public repository is [donizetiferr/answer-lens](https://github.com/donizetiferr/answer-lens); the [accepted live app](https://donizetiferr.github.io/answer-lens/) can still show the earlier workflow until independent acceptance.
 
-![Real desktop comparison capture](media/review-v2/desktop-blind.png)
+![Actual new result with a locked personal verdict and copy actions](docs/design_refs/answer-lens-evolution/captures/evolution-desktop-result.png)
 
-[Desktop result](media/review-v2/desktop-result.png) · [Mobile ratings](media/review-v2/mobile-ratings.png) · [Mobile result](media/review-v2/mobile-result.png)
+[Reading and deciding](docs/design_refs/answer-lens-evolution/captures/evolution-desktop-reading.png) · [Mobile result](docs/design_refs/answer-lens-evolution/captures/evolution-mobile-result.png) · [Long answers on mobile](docs/design_refs/answer-lens-evolution/captures/evolution-mobile-390-long.png) · [Copy-permission fallback](docs/design_refs/answer-lens-evolution/captures/evolution-copy-fallback.png)
 
-These are actual browser captures with synthetic example answers and scripted test ratings, not a human preference study.
+These are real browser captures with synthetic examples and scripted test decisions, not a human preference study. The [screen plan, journeys and capture manifests](docs/design_refs/answer-lens-evolution/DESIGN.md) distinguish the v1 baseline from the new implementation. The [six-second v1 preview](media/answer-lens-preview.mp4) is historical; new video is deferred until independent acceptance.
 
-## Run it locally
+## Run locally
 
-Node **22 or newer** is required for the included local server and tests. The browser app itself is vanilla HTML, CSS and JavaScript, with **zero runtime packages** and no build step.
+The runtime is vanilla HTML, CSS and browser JavaScript: **no runtime dependency and no build step**. Node 22 or newer runs the included loopback-only server and tests.
 
 ```sh
-git clone https://github.com/donizetiferr/answer-lens.git
+git clone --branch evolution/answer-lens-20260921 https://github.com/donizetiferr/answer-lens.git
 cd answer-lens
 node scripts/serve.mjs
 ```
 
-Open `http://127.0.0.1:4173` in a current browser. Using the local app requires no account, API key, payment, or internet connection. All app assets are local. `PORT=4180 node scripts/serve.mjs` selects a different local port.
+Open `http://127.0.0.1:4173`. Use `PORT=4180 node scripts/serve.mjs` for a different local port; stop with Ctrl+C. The server serves only a fixed app-file allowlist, not the repository. Do not double-click `index.html`: browser modules need a local HTTP origin or HTTPS.
 
-The server binds only to loopback and serves a fixed app-file allowlist, not the whole repository. Stop it with Ctrl+C. Do not double-click `index.html` as a `file://` document: browser modules and service workers need a local HTTP origin or HTTPS.
+After **Offline app ready**, the app shell is cached for later offline reloads on the same origin. This is separate from saving your comparison. A different browser/origin/port, browser eviction, or clearing site data can remove stored data or offline availability.
 
-After the footer says **Offline app ready**, the service worker has cached the app shell. The comparison also works after an offline reload. Browser storage clearing, private-window closure, a different origin/port, or browser cache eviction may remove that capability. Browser tests exercise an actual offline reload, not just an “offline” label.
+## Compare without filling out a questionnaire
 
-## Try the complete demo
+Choose **Try the synthetic demo** for a complete example. Its answers are original synthetic teaching material, not measured outputs from real models. The synthetic notice stays with the result and copied/exported material.
 
-Choose **Try the synthetic demo**, then **Hide names & compare**. Both demo answers are original synthetic examples about tidying a downloads folder. They are not measured outputs from named models. The synthetic label remains with the comparison, including its export; reset before starting an unrelated real comparison.
+For your own pair, enter the same question, both full answers, and optional source names. Remove self-identifying phrases when practical. Source names are user-supplied, not authenticated.
 
-For your own comparison, enter the same question for both answers, paste both answer texts, and optionally enter their source names. Those names are user-supplied, not authenticated. When you start, the app records a random seed and A/B assignment, removes the source inputs from the rendered page, and shows only the blind pair.
+**Hide names & compare** records a random seed and A/B assignment, removes the source fields from the rendered page, and shows the full answers. Use **Answer A**, **Answer B** and **Your decision** to move around; the answer headers remain identifiable while reading. Text is not truncated, summarized or interpreted as HTML/Markdown.
 
-Rate **usefulness**, **clarity**, and **factual confidence** for each answer. Use 1–5 for the first two; factual confidence also offers **Not sure**. Confidence is your feeling about the claims, not a fact-check. Nothing computes factual accuracy or averages your ratings into an automatic winner.
+Your **verdict is required**: prefer A, prefer B, call a tie, or choose neither. A missing verdict is explained beside the choices and keyboard focus returns there. A reason is optional.
 
-Choose **Answer A**, **Answer B**, **A tie**, or **Neither**. All six ratings and a verdict are required before **Lock verdict & reveal**. Your verdict and ratings are locked before origins appear. To make another comparison, reset; there is no hidden reroll or post-reveal score editing.
+**Add detailed ratings** is optional. Usefulness, clarity and factual confidence can each be left unrated. Factual confidence also allows **Not sure**. An omitted rating means **Not rated**—not zero, average, neutral or uncertain. Collapsing the section preserves selected ratings; **Clear optional ratings** removes only those ratings before reveal.
 
-**Export result JSON** downloads the full result. On the starting screen, **Open a saved JSON** reads an exported result locally. Imported results are already revealed, explicitly labelled that way, and never silently turn on saving. Generate a deterministic sample with `node scripts/demo.mjs`. Its seed, timestamps and ratings are explicitly illustrative. Browser tests separately check a real download and local import.
+**Lock verdict & reveal** locks your verdict, reason and any supplied ratings before showing origins. There is no automatic winner, hidden reroll or editing of a revealed result.
 
-## Privacy and honest boundaries
+## Keep the decision and try another pair
 
-The app makes no model calls, sends no answer text, has no analytics, trackers, external scripts, external fonts, signup, or paid service. Runtime requests are local GETs for the app shell. There is no backend that accepts uploads. Text is rendered as text, not HTML or Markdown.
+**Copy decision note** produces readable plain text containing the question, your verdict and reason, the revealed source mapping, supplied/omitted ratings, lock time, synthetic status and a short interpretation caveat. It does not silently include the full answer texts.
 
-Saving is **off by default**: your working comparison stays in that tab. Opting in saves one comparison as plain JSON under `answer-lens.session.v1` in this origin's `localStorage`. It is **not encrypted**. Turning saving off deletes that key while keeping the current tab usable. Reset removes this app's question, answers, sources, ratings, verdict, note and saved comparison, but not unrelated keys, the offline app cache, or files you already downloaded. Other opted-in tabs respond to updates and reset; simultaneous editing is last-write-wins, not collaborative merging.
+**Copy preferred answer** is available only for A or B, never for a tie or neither. It copies the complete selected answer. Synthetic demo answers receive an explicit synthetic prefix. Clipboard access happens only after your click. When permission is denied or the API is absent, the app exposes a labelled, selectable plain-text fallback; no remote service is used.
 
-Browser tools, extensions, another person with access to the same browser, and anyone you give an export to may read the full data. Storage blocking or quota failures produce an explicit warning rather than a false saving/deletion claim. This is not a tool for protecting secrets from someone who controls your device.
+**Export full result JSON** remains the complete portable record, including both answers and the recorded shuffle. **Open a saved JSON** reads locally, opens an already-revealed result and never silently enables saving. Both genuine v1 exports and v2 results with no, partial or full ratings are accepted under their respective contracts.
 
-Blinding is **at the interface level**. You pasted the answers and may recognize their style or content; answers may name their own model. The app does not silently rewrite or anonymize them. Ask someone else to prepare the pair for less familiarity, and remove self-identifying phrases when practical. Source fields and the recorded mapping are hidden in the comparison UI, not secured against local inspection.
+**Another pair for this question** asks for confirmation before replacing the result. Copy or export first. Cancelling changes nothing. Confirming retains **only the question**: no answers, origins, ratings, reason, verdict, demo flag, saving consent, timestamps or assignment carry over. A fresh assignment is recorded when the next pair begins. This is a new personal decision, not proof that a revised prompt or model is generally better.
 
-One preference on one question does **not** establish model superiority, factual correctness, or a general ranking. JSON records are editable files, not signed evidence of an experiment.
+## Saving, privacy and version safety
 
-## Export format
+Saving is **off by default**. A persistent status above the app and feedback beside the saving control distinguish tab-only, saving, saved, failed, protected-format and other-tab states. A normal workflow message does not erase a failed-save warning. A checked box alone is not a successful-save receipt.
 
-The self-contained `answer-lens-result/1` JSON includes the app version, fixed interpretation caveats, and a `comparison` containing the full question, original input order with both texts and source names, ratings by blind label, verdict, note, synthetic-demo flag, assignment time and verdict-lock time.
+Opting in stores one v2 comparison as unencrypted JSON under `answer-lens.session.v2` in this origin's `localStorage`. Cooperating v2 tabs serialize writes with a browser Web Lock and compare the exact saved snapshot before changing it. Without Web Lock support, the app stays usable in the tab but refuses to claim safe device saving; copy or export instead.
 
-`comparison.randomization` records `algorithm`, an unsigned 32-bit `seed`, `order`, and `assignedAt`. For example, `order: [1, 0]` means **A came from the second input and B from the first**. Production seeds come from `crypto.getRandomValues`; the versioned `mulberry32-first-draw-v1` function reproduces the assignment. Tests use fixed seed vectors; the UI has no seed override. The seed and mapping are disclosed only after reveal in the UI and export. They are not a cryptographic commitment.
+An update or reset in another tab **does not overwrite this tab's draft, selection or focus**. It turns this tab's saving off and shows a persistent notice. Saving this tab instead requires explicit confirmation. A stale confirmation cannot overwrite a saved copy that changed again. This is conflict detection, not collaborative merging or protection from other code controlling the origin.
 
-Import validates the schema, phase, ratings, sizes and seed/order consistency. It canonicalizes known fields and forces persistence consent off. It cannot establish the authenticity of user-supplied source names or prove that an edited JSON was originally produced by the app.
+Old v1 tabs use `answer-lens.session.v1`. V2 never writes or deletes that key. **Open older saved comparison** explicitly copies a valid older record into the current tab, with saving off; the original remains untouched. A v1 revealed record still needs the six ratings required by its old contract. V2 does not manufacture missing v1 data. Unknown/newer/malformed saved records are protected rather than auto-deleted or overwritten. This separation matters because URL paths on one origin share local storage.
 
-Limits: question 8,000 JavaScript string units; each answer 40,000; each source 120; note 2,000; imported file up to 600,000 bytes. Input limits avoid unbounded local rendering/storage work, not all possible resource exhaustion.
+Turning saving off or Reset removes only this tab's current, supported v2 saved copy when deletion succeeds. A newer copy from another tab or an unsupported record is preserved. Reset does not empty other open tabs, remove older v1 data, clear the clipboard, delete downloaded files, or delete unrelated keys and caches. Close/reset each tab separately and use browser storage controls when you need to remove older or unreadable copies. Failed deletion is reported, not represented as success.
 
-## Tests
+Unsaved work requests a browser leave/reload warning as a best effort. Browsers, especially on mobile, need not display it. Do not rely on that warning instead of the save status or an export.
 
-The isolated gate suite and deterministic Node demo require no installation, network, browser or child processes:
+No question or answer is uploaded by the app. Runtime assets are local/same-origin GETs, with no analytics, external scripts/fonts, automatic link previews, paid API or answer-submission endpoint. The public hosting service still serves the initial app request; local-first does not mean that visiting a hosted page makes no network request. Text and exports can be read by extensions, other code with access to the origin, the device owner, or anyone receiving your clipboard/export. This is not secret storage.
+
+## Honest limits and format
+
+Blinding is **interface-level**, not a secure double-blind experiment. You may recognize an answer you pasted; an answer can identify its source. The app does not rewrite that content to hide clues. Someone with browser tools can inspect local state.
+
+A preference on one question is not a model ranking. Factual confidence is the person's judgment, never verified accuracy. Source names and local JSON records are editable and unauthenticated.
+
+V2 exports use `answer-lens-result/2`, `assessment: human-self-report`, and comparison `version: 2`. They include the full question and original inputs, optional ratings by blind label, verdict/reason, synthetic flag, assignment and lock times, and caveats. Imports canonicalize supported fields and force saving consent off. V1 imports upgrade explicitly to v2 on export; they are not byte-identical v1 re-exports.
+
+The recorded `mulberry32-first-draw-v1` seed/order algorithm is unchanged. Production seeds come from `crypto.getRandomValues`; the UI has no seed control. For example, `order: [1, 0]` means A came from the second input. The seed is disclosed after reveal in the UI/export, not a cryptographic commitment.
+
+Limits remain: question 8,000 JavaScript string units; each answer 40,000; origin 120; reason 2,000; imported file 600,000 bytes. Long text still requires reading and local rendering work.
+
+## Tests and evidence
+
+The pure gates and deterministic Node demo need **no installation, network, browser, server or child processes**:
 
 ```sh
 node scripts/run-gates.mjs
 node scripts/demo.mjs > result.json
 ```
 
-The gate runner imports the three `test_files` in `buildsignal-gates.json` into the current process. Each test file is also directly runnable with `node`. The demo writes a complete JSON result to standard output and uses no clock or random input.
+Each `test_file` in `buildsignal-gates.json` is directly runnable with Node; the gate runner imports them into its own process. `scripts/demo.mjs` is a deterministic executable Node program, not HTML. Its fixed seed, times and test ratings are illustrative.
 
-Server and actual-browser checks are separate from those isolated gates. The only development dependency is pinned Playwright; it is not shipped into the app. The test runner is Node's built-in `node:test`.
+Actual UI/server checks are separate. Playwright is pinned as a development-only dependency, and no browser binary is bundled:
 
 ```sh
 node --test tests/server.test.mjs
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm ci --ignore-scripts
 CHROME_PATH=/usr/bin/google-chrome npm run test:browser
-# All three suites:
+# All isolated, server and browser suites:
 npm run test:all
 ```
 
-Set `CHROME_PATH` to an installed Chrome/Chromium executable when it differs. No browser binary is bundled or automatically downloaded by the commands above. Browser tests create isolated contexts and a temporary loopback server and close both in teardown. They create synthetic-only evidence and screenshots in this repository.
+Browser tests use isolated contexts and their own temporary loopback servers with teardown. They write synthetic-only captures and local receipts, not user data. Frozen v1 core/storage fixtures come from the prior commit and exercise real old validation/deletion behavior alongside v2; no compatibility repository is modified.
 
-`tests/core.test.mjs` tests input validation, seeded ordering, blind projections, locked verdicts, reset state, safe text preservation and export/import. `tests/storage.test.mjs` tests consent, restoration, corrupt/blocked storage and key-scoped deletion. `tests/server.test.mjs` tests safe headers, the app-file allowlist, rejected uploads and local-only assets. `tests/browser.test.mjs` exercises the real app, DOM/accessibility-tree source hiding, hostile-looking text, actual downloads/import, keyboard interactions, 390px mobile layout, 320px overflow, multiple tabs, and offline reload.
-
-Recorded results and their limits are in [`docs/evidence.md`](docs/evidence.md). Machine-readable entry points are in [`buildsignal-gates.json`](buildsignal-gates.json). Passing these checks is not a full accessibility, security, cross-browser, or scientific evaluation certification.
-
-## Structure and maintenance
-
-`index.html`, `styles.css`, `icon.svg`, `sw.js`, and `src/` are the complete runtime. `src/core.js` is pure comparison logic; `src/storage.js` handles only this app's local key; `src/app.js` renders safe text nodes and handles the workflow. `src/demo.js` holds the synthetic examples. The service worker caches only the fixed app-file list; increment its cache version when changing released assets.
-
-`scripts/serve.mjs` is the dependency-free local development server. Media preparation and validation scripts are separate from runtime. They do not run on app startup, do not add a media service to the product, and do not modify DoniStudio policies.
+See [evolution evidence](docs/evolution-evidence.md), [historical build/media evidence](docs/evidence.md) and [screen references](docs/design_refs/answer-lens-evolution/DESIGN.md). Reported keyboard/DOM/accessibility-tree checks are not a fabricated screen-reader, full accessibility or cross-browser certification.
 
 ## Prior art and license
 
-Blind pairwise comparison is prior art, notably **Chatbot Arena**: Chiang et al., *Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference* (2024), [arXiv:2403.04132](https://arxiv.org/abs/2403.04132). Answer Lens does not claim to invent it and does not reuse Arena's code, assets, model outputs or branding.
+Blind pairwise comparison is prior art, notably Chiang et al., *Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference* (2024), [arXiv:2403.04132](https://arxiv.org/abs/2403.04132). Answer Lens does not reuse Arena's code, branding, assets or model answers, and does not claim to invent the method.
 
-The differentiation is deliberately narrower: a local, paste-first personal worksheet; human ratings with explicit uncertainty; a verdict locked before reveal; recorded shuffle; and a portable result rather than a leaderboard. See [`docs/differentiation.md`](docs/differentiation.md).
+The narrower differentiation is a paste-first local worksheet: full-answer reading, an explicit personal verdict before source reveal, optional rather than compulsory scoring, readable takeaways, recorded assignment, and a safe next pair for the same question—not a leaderboard. See [differentiation](docs/differentiation.md).
 
 Copyright © 2026 Donizeti Ferreira. [MIT License](LICENSE).

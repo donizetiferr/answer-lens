@@ -18,3 +18,6 @@ CHECKPOINT.local.md
 !/media/review-v2/desktop-result.png
 !/media/review-v2/mobile-ratings.png
 !/media/review-v2/mobile-result.png
+
+# The README demo output is generated locally, not a source asset.
+/result.json

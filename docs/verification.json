@@ -1,0 +1,84 @@
+{
+  "schema": "answer-lens-review-verification/1",
+  "request": "answer-lens-evolution-20260921-round-2",
+  "base_sha": "72bc7ab2bf672ff1cfc480a17c5f06597c85d020",
+  "branch": "evolution/answer-lens-20260921",
+  "environment": {
+    "node": "v24.16.0",
+    "browser": "151.0.7922.137"
+  },
+  "browser_observed_at": "2026-09-21T07:46:22.148Z",
+  "checks": [
+    {
+      "command": "node --permission --allow-fs-read=. scripts/run-gates.mjs",
+      "exit_code": 0,
+      "tests": 51,
+      "pass": 51,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 91.52774,
+      "raw_receipt_sha256": "4dff363333aed61cbb5009c9646c83799602367b4dbcac17b6a70ac1e730b0ac"
+    },
+    {
+      "command": "node --test tests/server.test.mjs",
+      "exit_code": 0,
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 180.599679,
+      "raw_receipt_sha256": "e5d7d5f00a79ed8f3d45232934de595555ecfd4d242c9bdeb17d891e150a9713"
+    },
+    {
+      "command": "node --test --test-concurrency=1 tests/browser.test.mjs tests/evolution.browser.test.mjs",
+      "exit_code": 0,
+      "tests": 33,
+      "pass": 33,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 48695.212695,
+      "raw_receipt_sha256": "daf622b32551fc1ddd4b596184bcb0977f19ac1f58553e946054fd3143c7da4e"
+    }
+  ],
+  "total_passed": 89,
+  "demo": {
+    "command": "Two node --permission --allow-fs-read=. scripts/demo.mjs executions followed by cmp",
+    "exit_code": 0,
+    "byte_identical": true,
+    "stdout_sha256": "d22757bd1df7a1996cb99b877dcd2a7cc4b3f10d156f19d80edc31b789b9a276"
+  },
+  "page_errors": [],
+  "external_requests": [],
+  "non_get_requests": [],
+  "capture_manifest": "design_refs/answer-lens-evolution/captures.json",
+  "visual_review": "design_refs/answer-lens-evolution/visual-review.json",
+  "runtime_hashes": {
+    "index.html": "76c0a3d97ef64586b4ffe353fc6a053dfb2a0c0f8d8b24e6412dc5498b32b22a",
+    "styles.css": "5fc5dd9bad5ca69f030c49a4b4491c85337dec4c2f9771bc2d89164a3e6230b3",
+    "sw.js": "9aa9231023babbb9d8e16db56e97823d9942a476cd02ffaef3365c75a5eb4289",
+    "src/app.js": "760858511ea4157532d395a64021fc16697c22df0f529f55f000df49efcf44d7",
+    "src/core.js": "0bb27ea410403d05bc196629123ef7c76763bacda29bcaf2c33c51212fda5ab5",
+    "src/storage.js": "393609869a13a7bece42f5f6d8e8dbf088614485413d3037a8bb6ff4f4a49339",
+    "src/output.js": "fdd470fa8807309450b066463da31da4b11c82e5be52abd71ad2ee3e865f816d",
+    "src/demo.js": "5303e108056c026a36a67a88dc03a51cf4b5bed36ee284a29db221503de28903"
+  },
+  "execution_model_observed": null,
+  "independent_acceptance": false,
+  "deployment_performed": false,
+  "release_audit": {
+    "checked_at": "2026-09-21T07:51:05.641831+00:00",
+    "status": "pass",
+    "tracked_files_scanned": 68,
+    "changed_files_checked": 47,
+    "findings": [],
+    "historical_media_unchanged": 5,
+    "frozen_v1_fixture_bytes_match": true,
+    "runtime_and_reviewed_capture_hashes_match": true,
+    "relative_document_links_resolve": true,
+    "diff_check_exit_code": 0,
+    "scope": "Basic credential patterns, artifact hygiene, staged/worktree equality, relative links and evidence integrity; not a complete security or privacy audit."
+  }
+}

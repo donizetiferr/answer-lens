@@ -32,11 +32,11 @@ test('reset clears saved answers without deleting other storage', () => {
   saveLocal(demoSession(true), () => storage); assert.equal(clearLocal(() => storage).ok, true);
   assert.equal(loadLocal(() => storage).session, null); assert.equal(storage.getItem('unrelated'), 'preserved');
 });
-test('corrupt, oversized, and non-consenting data are removed safely', () => {
+test('corrupt, oversized, future and non-consenting data are preserved, not auto-deleted', () => {
   for (const json of ['{broken', 'x'.repeat(600001), JSON.stringify(emptySession()), '{"version":999}']) {
     const storage = new MemoryStorage(); storage.setItem(STORAGE_KEY, json);
     const loaded = loadLocal(() => storage); assert.equal(loaded.ok, false); assert.equal(loaded.session, null);
-    assert.equal(storage.data.has(STORAGE_KEY), false); assert.match(loaded.message, /removed/);
+    assert.equal(storage.getItem(STORAGE_KEY), json); assert.equal(loaded.protected, true); assert.match(loaded.message, /untouched/);
   }
 });
 test('storage access, quota and deletion failures are reported without throwing', () => {
