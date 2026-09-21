@@ -1,0 +1,13 @@
+# Version 2 release review
+
+The release candidate `28fda44` includes the independently reviewed verdict-first application, the current isolated catalog prototype and the new captioned screenshot video. The application requires only a verdict; detailed ratings are optional. It supports full-answer navigation, readable copy outputs and a new pair that retains only the question after confirmation.
+
+The earlier implementation review (`78a25c0`) and prototype review (`0d798eb`) remain separate evidence. The latter reports 59 Node tests, five server tests and 41 Chrome tests passing. Independent acceptance reran the 59 pure gates on Windows Node 22.22.2 and all eight affected prototype/browser checks on the final candidate in a separate VPS worktree. Both commands passed with no skips: `node --permission --allow-fs-read=. scripts/run-gates.mjs` and `node --test tests/prototype.browser.test.mjs`. The Windows headless browser launcher exited before tests could run; that execution is not counted as a browser pass. Real Windows Chrome was also used for manual desktop/mobile review.
+
+Independent real-browser checks covered a cached v1 upgrade, unchanged legacy bytes and assignment, a verdict without ratings, next-pair cancellation/confirmation, visible failed saving beside the save control, and selectable copy fallback. A separate synthetic fixture confirmed that preview save/reveal/copy/reset leaves root v1/v2 bytes untouched. The fixed SVG decoded at 48×48 and was visually inspected. No real user comparison was used.
+
+The installed Prancheta strict validator accepted both current screens with zero findings. The finishing changes declare actual local actions for static and generated controls, use the root package version, add a surface inventory and remove scenario selectors with no handler. These change catalog declarations, not the root application workflow. The final eight-browser-test run also checks action declarations in the exercised states, full journeys, real clipboard, offline aliases and data isolation.
+
+The eight root HTML/CSS/worker/source files match the Git bytes used for the v2 media capture. The favicon repair is separate. The [v2 media receipt](../media/answer-lens-v2-preview.json) records the actual six-second MP4 and native DoniStudio provenance. The old video remains byte-for-byte intact.
+
+This evidence does not establish growth, a model benchmark, screen-reader certification, physical-device coverage or Safari/Firefox compatibility. Personal preferences remain subjective; device storage is unencrypted and clipboard/downloaded copies remain outside reset.
