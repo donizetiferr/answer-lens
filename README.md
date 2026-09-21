@@ -4,7 +4,9 @@
 
 A small English web tool for comparing two AI answers with their source names hidden until after your own verdict. Paste a question and two answers, read the shuffled A/B pair, rate it yourself, then reveal the names and keep a complete result JSON.
 
-This repository is **private**, pending the owner's independent release review. Nothing is deployed publicly or published to X. The software is MIT licensed; that does not make this private repository a public launch.
+**[Try Answer Lens in your browser](https://donizetiferr.github.io/livre-10/)** · MIT licensed · No account or API key required.
+
+[Watch the six-second preview](media/answer-lens-preview.mp4). It combines real app screenshots with labelled synthetic examples and English captions, rendered and verified with DoniStudio. It is a quick preview, not a model benchmark.
 
 ![Real desktop comparison capture](media/review-v2/desktop-blind.png)
 
@@ -22,7 +24,7 @@ cd livre-10
 node scripts/serve.mjs
 ```
 
-Open `http://127.0.0.1:4173` in a current browser. Repository access requires the owner's GitHub authorization; using the app requires no account, API key, payment, or internet connection. All app assets are local. `PORT=4180 node scripts/serve.mjs` selects a different local port.
+Open `http://127.0.0.1:4173` in a current browser. Using the local app requires no account, API key, payment, or internet connection. All app assets are local. `PORT=4180 node scripts/serve.mjs` selects a different local port.
 
 The server binds only to loopback and serves a fixed app-file allowlist, not the whole repository. Stop it with Ctrl+C. Do not double-click `index.html` as a `file://` document: browser modules and service workers need a local HTTP origin or HTTPS.
 

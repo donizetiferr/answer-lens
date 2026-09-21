@@ -1,0 +1,24 @@
+{
+  "versao": 1,
+  "colecao": {
+    "titulo": "Answer Lens",
+    "descricao": "Protótipo local navegável da jornada real: preparar duas respostas, avaliar sem nomes, revelar, exportar/importar e limpar. Usa somente exemplos sintéticos até o visitante inserir seu próprio texto.",
+    "finalidade": "atual",
+    "inicio": "comparison.html",
+    "jornadas": [{"id":"compare","titulo":"Comparar duas respostas","inicio":"comparison.html","dispositivo":"responsivo"}]
+  },
+  "padrao": {"canal":"web","ambiente":"demonstração","dispositivo":"responsivo","perfilDesign":"answer-lens-claro"},
+  "telas": {
+    "comparison.html": {
+      "idTela":"answer-lens:comparison",
+      "titulo":"Comparar, escolher e revelar",
+      "tipo":"prototipo",
+      "estado":"preparação; demo e demais estados navegáveis",
+      "capacidade":"interacao-local",
+      "viewport":{"largura":1440,"altura":1000},
+      "origem":"aplicação do commit 7943949ffd1963e0e354dff9c03822255ebbe652",
+      "build":"1.0.0",
+      "recursos":["styles.css","icon.svg","sw.js","src/app.js","src/core.js","src/storage.js","src/demo.js"]
+    }
+  }
+}

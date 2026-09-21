@@ -1,6 +1,6 @@
 # Build and verification evidence
 
-Job: `buildsignal-answer-lens-20260921`. This is a private implementation for independent release review, not a public launch, a model benchmark, or a claim of scientific double blinding.
+Job: `buildsignal-answer-lens-20260921`. The first implementation was delivered privately for independent review. The release review and smaller native preview below supersede that initial delivery boundary. This is not a model benchmark or a claim of scientific double blinding.
 
 The resumed work inspected the existing workspace and receipts before changing files. Git reported **no commits yet on main**. Authenticated repository metadata identified `donizetiferr/livre-10`, owner `donizetiferr`, `private: true`, size 0, default branch `main`; `git ls-remote origin refs/heads/main` returned no branch. The existing implementation was retained, not regenerated.
 
@@ -75,7 +75,15 @@ The dedicated review-server job was stopped by its exact job ID. Integration tes
 
 Blinding is only at the interface: a person may recognize pasted content, an answer may identify itself, and local storage can be inspected. Sources are user-entered; confidence is not a fact-check. A single personal preference does not establish model superiority. Local JSON is editable and unsigned; storage is optional, unencrypted and subject to browser clearing or eviction. Offline reload requires the initial successful app-cache installation on the same origin. Reset cannot delete previously downloaded files. Concurrent opted-in tabs use last-write-wins rather than merged editing.
 
-The checks do not establish full accessibility conformance, screen-reader coverage, cross-browser compatibility, penetration-test certification, or general model quality. The optional captioned video remains blocked by the native planner's workload budget. Independent release review is still required; publication is not authorized by these test results.
+The checks do not establish full accessibility conformance, screen-reader coverage, cross-browser compatibility, penetration-test certification, or general model quality. The original 18-second composition exceeded the native planner's workload budget. The smaller preview and independent release review are recorded below; test results alone never authorized publication.
+
+## Independent review and native preview
+
+The independent executor fetched commit `7943949ffd1963e0e354dff9c03822255ebbe652` from GitHub and ran the existing BuildSignal gates on Windows / Node 22.22.2 with Node permissions restricting filesystem access and denying network and child processes: **33 tests passed**, deterministic demo passed, and current-tree/history credential scans had no findings. The desktop/mobile application files matched the independently exercised preview after normalizing Git line endings. The reviewer exercised blind comparison, rating/verdict, reveal, actual export/import, reset, and inspected both screen sizes.
+
+A separate six-second preview was composed from three real screenshots, with baked English captions and labelled synthetic data. Its single-track, 864x612 / 24fps / 144-frame plan costs **761,425,920 pixel-work units**, below the unchanged 1,000,000,000 limit. Native DoniStudio `ops.edit_graph plan`, `frame`, `render` and `verify` all exited 0. The dedicated render retained 4 GiB memory / two-CPU / 256-task caps, completed in 19.122 seconds and used 562 MiB peak memory according to systemd.
+
+Plan SHA-256: `9872ed6ae3409de845bd76fcc4d0eb11843689088228801e83ebba3dcf27bd60`. Render report SHA-256: `b223a761c7e8e936348c40b46f80f35d16efe00880d20c7c088adf165e57930b`. Native verification returned `ARTIFACT_BYTES_AND_MAP_VERIFIED`. Downloaded MP4 SHA-256: `bb60266ed7c5ba82b693774f88eb2416c9733ade8c708ff88b0eecf068035ce5`, 141,399 bytes. Independent `ffprobe` confirmed H.264, 864x612, 24fps and 6.000 seconds; three frames decoded from that MP4 were visually inspected. This proves the short screenshot preview, not the earlier 18-second composition. No Studio policy or service was changed.
 
 ## Release-file audit
 
