@@ -19,6 +19,17 @@ function el(tag, attrs = {}, ...children) {
   if (tag === 'button' || (tag === 'a' && String(attrs.href || '').startsWith('#'))) {
     node.dataset.acao = attrs.id || (tag === 'a' ? 'scroll-comparison' : 'comparison-action');
   }
+  // An opaque catalog frame forbids actual form submission. Invoke only the
+  // existing local handler; never relax the viewer's sandbox or send a request.
+  if (globalThis.origin === 'null' && tag === 'button' && attrs.type === 'submit') {
+    node.type = 'button';
+    node.addEventListener('click', () => node.closest('form')?.dispatchEvent(new Event('submit', { cancelable: true })));
+  }
+  if (globalThis.origin === 'null' && tag === 'form') node.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && event.target.tagName === 'INPUT' && !event.isComposing) {
+      event.preventDefault(); node.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
+  });
   return node;
 }
 const loaded = loadLocal();
@@ -319,6 +330,12 @@ function renderComparison() {
 function downloadResult() {
   try {
     const json = exportResult(session);
+    if (globalThis.origin === 'null') {
+      $('#copy-fallback').hidden = false; $('#copy-label').textContent = 'Full result JSON — select and copy';
+      $('#copy-text').value = json; $('#copy-text').focus(); $('#copy-text').select();
+      say('This isolated viewer cannot download files. The full result JSON is selected below for you to copy.');
+      return;
+    }
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     downloadUrl = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
     const link = el('a', { href: downloadUrl, download: `answer-lens-${session.lockedAt.slice(0, 10)}.json` });
@@ -397,7 +414,7 @@ window.addEventListener('beforeunload', event => {
 render();
 if (loaded.message) say(loaded.message);
 else if (loaded.session) say('Restored the comparison you chose to save on this device.');
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && globalThis.origin !== 'null') {
   navigator.serviceWorker.register('./sw.js').then(async () => {
     await navigator.serviceWorker.ready;
     $('#offline-status').textContent = `Offline app ready · v${VERSION}`;

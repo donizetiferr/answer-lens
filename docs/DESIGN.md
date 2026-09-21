@@ -24,6 +24,8 @@ Open `http://127.0.0.1:4181/docs/design_refs/answer-lens/comparison.html` or `ht
 
 ## Narrow preview adaptations
 
+The Prancheta viewer runs in an opaque sandbox, where native form submission, service workers, storage and downloads can be unavailable. In that context only, preview submit buttons and Enter invoke the existing local handlers directly. JSON export offers selected copyable text, and the worker getter is not accessed. The viewer's permissions are unchanged; the standalone preview retains its normal forms, storage, downloads and offline behavior.
+
 The visible **Isolated preview** notice is deliberate. Root and prototype can share a hosting origin, so URL paths alone are not used as a data boundary.
 
 | Resource | Root app | Current preview |

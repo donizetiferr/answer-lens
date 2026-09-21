@@ -21,10 +21,29 @@ export function annotateLocalActions(text) {
       (_tag, attributes, anchor) => `<a data-acao="scroll-${anchor}"${attributes}>`);
 }
 export function annotatePreviewApp(text) {
-  return once(text, '  return node;', `  if (tag === 'button' || (tag === 'a' && String(attrs.href || '').startsWith('#'))) {
+  text = once(text, '  return node;', `  if (tag === 'button' || (tag === 'a' && String(attrs.href || '').startsWith('#'))) {
     node.dataset.acao = attrs.id || (tag === 'a' ? 'scroll-comparison' : 'comparison-action');
   }
+  // An opaque catalog frame forbids actual form submission. Invoke only the
+  // existing local handler; never relax the viewer's sandbox or send a request.
+  if (globalThis.origin === 'null' && tag === 'button' && attrs.type === 'submit') {
+    node.type = 'button';
+    node.addEventListener('click', () => node.closest('form')?.dispatchEvent(new Event('submit', { cancelable: true })));
+  }
+  if (globalThis.origin === 'null' && tag === 'form') node.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && event.target.tagName === 'INPUT' && !event.isComposing) {
+      event.preventDefault(); node.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
+  });
   return node;`);
+  text = once(text, '    const json = exportResult(session);', `    const json = exportResult(session);
+    if (globalThis.origin === 'null') {
+      $('#copy-fallback').hidden = false; $('#copy-label').textContent = 'Full result JSON — select and copy';
+      $('#copy-text').value = json; $('#copy-text').focus(); $('#copy-text').select();
+      say('This isolated viewer cannot download files. The full result JSON is selected below for you to copy.');
+      return;
+    }`);
+  return once(text, "if ('serviceWorker' in navigator) {", "if ('serviceWorker' in navigator && globalThis.origin !== 'null') {");
 }
 function once(text, from, to) {
   if (text.split(from).length !== 2) throw new Error(`Preview adaptation no longer matches exactly: ${from}`);
@@ -51,7 +70,7 @@ export async function expectedPrototype(root = ROOT) {
   let sw = once(source.get('sw.js'), 'answer-lens-shell:', 'answer-lens-preview-shell:');
   sw = once(sw, "'./index.html',", "'./index.html', './comparison.html', './mobile.html',");
   // Cache the isolated bytes, not a previously cached v1 catalog copy.
-  sw = once(sw, `\${PREFIX}${appVersion}`, `\${PREFIX}${appVersion}-catalog-r3-review`);
+  sw = once(sw, `\${PREFIX}${appVersion}`, `\${PREFIX}${appVersion}-catalog-r3-viewer`);
   output.set('sw.js', sw);
   const resources = ['styles.css', 'icon.svg', 'sw.js', 'src/app.js', 'src/core.js', 'src/storage.js', 'src/demo.js', 'src/output.js'];
   const metadata = JSON.parse(await readFile(join(root, COLLECTION, 'prancheta.json'), 'utf8'));
@@ -88,6 +107,8 @@ export async function expectedPrototype(root = ROOT) {
       'Only the three constants STORAGE_KEY, LEGACY_KEY and LOCK_NAME differ in storage.js. Preview never reads, writes or removes the production keys.',
       'The service worker has a preview-only cache prefix/version and caches all three HTML entry points within its own scope.',
       'HTML and app.js add data-acao declarations to existing local buttons and fragment links for the catalog viewer; handlers and behavior are unchanged.',
+      'In an opaque sandbox only, submit buttons and Enter invoke the existing local handler without native form submission; the disabled service-worker getter is never accessed. Viewer sandbox permissions remain unchanged.',
+      'In that restricted viewer, export selects the full JSON as local text instead of requesting a forbidden download. The normal standalone preview still downloads files.',
       'core.js, output.js, demo.js, CSS and icon bytes otherwise match the root app. resources.json is build metadata, not a runtime resource. No additional runtime dependency.'
     ],
     generatedHashes: Object.fromEntries([...output].map(([path, text]) => [path, hash(text)])),

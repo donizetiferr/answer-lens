@@ -209,6 +209,37 @@ test('prototype journeys produced no app exceptions, external requests or outgoi
   assert.deepEqual(errors, []); assert.deepEqual(external, []); assert.deepEqual(nonGet, []);
 });
 
+test('opaque catalog sandbox supports decisions and copyable JSON without form, storage or worker permissions', async () => {
+  const context = await browser.newContext(); contexts.add(context);
+  const pageErrors = [], consoleErrors = [], requests = [];
+  const policy = `sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox; default-src 'none'; script-src ${base}; style-src 'unsafe-inline' ${base}; img-src data: ${base}; connect-src 'none'; form-action 'none'; worker-src 'none'`;
+  try {
+    await context.route(base + '/**', async route => {
+      const response = await route.fetch();
+      await route.fulfill({ response, headers: { ...response.headers(), 'access-control-allow-origin': '*',
+        ...(route.request().isNavigationRequest() ? { 'content-security-policy': policy } : {}) } });
+    });
+    const page = await context.newPage();
+    page.on('pageerror', error => pageErrors.push(error.message));
+    page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
+    page.on('request', request => { if (request.method() !== 'GET') requests.push(request.method()); });
+    await page.goto(base + PREVIEW_PATH + 'comparison.html');
+    assert.equal(await page.evaluate(() => globalThis.origin), 'null');
+    await page.click('#demo-button'); await page.click('#begin-button');
+    await page.waitForSelector('#verdict-form'); await page.click('#reveal-button');
+    assert.equal(await page.evaluate(() => document.activeElement.name), 'verdict');
+    await choose(page, 'verdict', 'A'); await page.locator('input[name="verdict"][value="A"]').press('Enter');
+    await page.waitForSelector('#export-button'); await page.click('#export-button');
+    const exported = JSON.parse(await page.inputValue('#copy-text'));
+    assert.equal(exported.comparison.phase, 'revealed');
+    assert.match(await page.locator('#status').innerText(), /cannot download/);
+    assert.match(await page.locator('#data-status').innerText(), /unavailable/);
+    assert.deepEqual(requests, []); assert.deepEqual(pageErrors, []); assert.deepEqual(consoleErrors, []);
+    await page.click('#reset-button'); await page.click('#confirm-reset'); await page.waitForSelector('#question');
+    assert.equal(await page.inputValue('#question'), '');
+  } finally { await dispose(context); }
+});
+
 test('root and preview favicon assets decode as actual SVG images', async () => {
   const context = await browser.newContext({ viewport: { width: 96, height: 96 } }); contexts.add(context);
   try {

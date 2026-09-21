@@ -1,6 +1,6 @@
 // App shell only: never cache user answers, exports, or arbitrary requests.
 const PREFIX = `answer-lens-preview-shell:${new URL(self.registration.scope).pathname}:`;
-const CACHE = `${PREFIX}2.0.0-catalog-r3-review`;
+const CACHE = `${PREFIX}2.0.0-catalog-r3-viewer`;
 const FILES = ['./', './index.html', './comparison.html', './mobile.html', './styles.css', './icon.svg', './src/app.js', './src/core.js', './src/storage.js', './src/demo.js', './src/output.js'];
 const URLS = new Set(FILES.map(path => new URL(path, self.registration.scope).href));
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting())));
