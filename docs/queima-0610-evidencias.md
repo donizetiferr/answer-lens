@@ -23,3 +23,9 @@ O Secret scan do primeiro item passou no [run 37552160147](https://github.com/do
 ### Q2-R — captura do favicon no runner
 
 O [primeiro run de qualidade](https://github.com/donizetiferr/answer-lens/actions/runs/37552417010) passou nos dois jobs Node e em 43 de 44 jornadas Chromium. A última falhou em `Page.captureScreenshot` de um documento SVG standalone, depois de as duas decodificações 48×48 passarem. A correção mantém a decodificação e captura o mesmo SVG via elemento `img` numa página HTML real. Teste local direcionado: 1/1 pass, sem skips. O próximo run valida a correção no runner original; não se declara o primeiro run verde.
+
+## Q3 — importação cancelada e atrasada
+
+Três testes Chromium reproduziram as falhas antes da correção (0/3): file input mantinha o nome após cancelamento em 1440/390px e uma leitura atrasada trocava “Clear this comparison?” por “Open this result instead?”. Depois: 3/3 passes. `npm run test:all`: 61 Node + 5 servidor + 47 Chromium, zero falhas/skips. O input agora permite selecionar o mesmo arquivo físico novamente, e uma confirmação posterior invalida o pedido de arquivo pendente. Cancelar preserva exatamente os bytes do rascunho salvo; confirmar abre um resultado já revelado com saving off.
+
+TELA: localhost, resultado aberto depois de cancelar e selecionar novamente o mesmo JSON | VI: selo Opened result · already revealed, razão sintética e fontes corretas, saving desmarcado; ações legíveis em desktop e empilhadas no mobile sem corte. PNGs inspecionados: [desktop](design_refs/queima-0610/import-retry-desktop.png) e [mobile](design_refs/queima-0610/import-retry-mobile.png). Nivel: COMPLETO; não se declara FINAL. O protótipo foi regenerado e preserva as adaptações do sandbox.

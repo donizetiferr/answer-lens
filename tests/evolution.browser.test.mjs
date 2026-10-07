@@ -443,6 +443,52 @@ test('a delayed local import cannot bring old data back after reset', async () =
   } finally { await context.close(); }
 });
 
+for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
+  test(`cancelled JSON import can select the exact same file again at ${viewport.width}px`, async () => {
+    const { context, page } = await fixture({ viewport });
+    try {
+      await page.click('#demo-button'); await page.fill('#question', 'Synthetic draft: keep until import confirmation.');
+      await page.check('#remember'); await saved(page);
+      const prior = await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY);
+      const path = join(output, `same-file-${viewport.width}.json`);
+      const result = lockAndReveal(beginBlind(demoSession(), { seed: 42, now: '2026-10-06T20:00:00.000Z' }), 'B', 'Synthetic file retry.', '2026-10-06T20:01:00.000Z');
+      await writeFile(path, exportResult(result));
+      await page.setInputFiles('#import-file', path); await page.waitForSelector('#reset-dialog[open]');
+      assert.equal(await page.inputValue('#import-file'), '');
+      await page.click('#cancel-reset');
+      assert.equal(await page.inputValue('#question'), JSON.parse(prior).question);
+      assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), prior);
+      await page.setInputFiles('#import-file', path); await page.waitForSelector('#reset-dialog[open]'); await page.click('#confirm-reset');
+      await page.waitForSelector('#copy-note'); await page.waitForFunction(key => localStorage.getItem(key) === null, STORAGE_KEY);
+      assert.equal(await page.locator('#remember').isChecked(), false);
+      assert.match(await page.locator('.reveal-summary').innerText(), /already revealed/i);
+      assert.match(await page.locator('.result-note').innerText(), /Synthetic file retry/);
+      await capture(page, `import-retry-${viewport.width}`, 'Same on-disk JSON selected after cancellation; valid result opened locally with saving off.', true);
+    } finally { await context.close(); }
+  });
+}
+
+test('a delayed import cannot replace a newer reset confirmation', async () => {
+  const { context, page } = await fixture({ init: () => {
+    const original = File.prototype.text;
+    File.prototype.text = function() {
+      if (this.name === 'delayed-confirm.json') return new Promise(resolve => { globalThis.finishImportConfirmation = resolve; });
+      return original.call(this);
+    };
+  } });
+  try {
+    await page.fill('#question', 'Synthetic draft for a later reset decision.');
+    await page.setInputFiles('#import-file', { name: 'delayed-confirm.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
+    await page.waitForFunction(() => typeof globalThis.finishImportConfirmation === 'function');
+    await page.click('#reset-button'); await page.waitForSelector('#reset-dialog[open]');
+    await page.evaluate(json => globalThis.finishImportConfirmation(json), legacyJSON());
+    assert.equal(await page.locator('#reset-heading').innerText(), 'Clear this comparison?');
+    await page.click('#confirm-reset'); await page.waitForSelector('#question');
+    assert.equal(await page.inputValue('#question'), '');
+    assert.equal(await page.locator('#copy-note').count(), 0);
+  } finally { await context.close(); }
+});
+
 test('evolution journeys emitted no app exceptions, external requests or outgoing data requests', () => {
   assert.deepEqual(errors, []); assert.deepEqual(externalRequests, []); assert.deepEqual(nonGetRequests, []);
 });

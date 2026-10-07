@@ -177,6 +177,8 @@ function renderSetup() {
 }
 async function openResult(event) {
   const file = event.target.files?.[0]; if (!file) return;
+  // Keep the File object, but allow a cancelled import to select the same file again.
+  event.target.value = '';
   const request = ++fileTicket, view = viewTicket;
   clearError();
   try {
@@ -342,6 +344,8 @@ function render(focus = false) {
 }
 let pendingAction = null;
 function confirmAction(title, description, button, action) {
+  // A newer user decision supersedes any file still being read in this view.
+  ++fileTicket;
   $('#reset-heading').textContent = title; $('#reset-description').textContent = description;
   $('#confirm-reset').textContent = button; pendingAction = action; $('#reset-dialog').showModal();
 }

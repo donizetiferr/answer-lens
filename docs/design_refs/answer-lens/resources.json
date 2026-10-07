@@ -1,13 +1,13 @@
 {
   "schema": "answer-lens-preview-resources/1",
   "appVersion": "2.0.0",
-  "sourceTreeSha256": "882ef922fc77344f8cc1255f4fd48d5f1a6a371f57480ba82333fb581b886237",
+  "sourceTreeSha256": "383cc83464d112f45a5ac1b85c1ca36230f2be41c9b4cb15b558f2d1453390b9",
   "sourceHashes": {
     "index.html": "76c0a3d97ef64586b4ffe353fc6a053dfb2a0c0f8d8b24e6412dc5498b32b22a",
     "styles.css": "5fc5dd9bad5ca69f030c49a4b4491c85337dec4c2f9771bc2d89164a3e6230b3",
     "icon.svg": "1ee8f4cf7d4dbb6162bce94f53852a6bb2b483b72a2e1b6e256607542e3ea9be",
-    "sw.js": "a80e6f960a2705fc3afa9e7155f26272b1a2a83a0c17d64212379f9d9dc108ac",
-    "src/app.js": "760858511ea4157532d395a64021fc16697c22df0f529f55f000df49efcf44d7",
+    "sw.js": "4e88d1382c05653bfd74c233e5ed82d5afe40f4fc2fdd097c11168fca3b9b82f",
+    "src/app.js": "c905bc32f47718e43a9b0d1820c129037759ab421eda69e820c41f5b951d0702",
     "src/core.js": "0bb27ea410403d05bc196629123ef7c76763bacda29bcaf2c33c51212fda5ab5",
     "src/storage.js": "393609869a13a7bece42f5f6d8e8dbf088614485413d3037a8bb6ff4f4a49339",
     "src/demo.js": "5303e108056c026a36a67a88dc03a51cf4b5bed36ee284a29db221503de28903",
@@ -31,15 +31,15 @@
     "index.html": "427a9e72a3307bfb76b64199cdfcf87481f22b449689a6715b5a51f2acb342a3",
     "styles.css": "5fc5dd9bad5ca69f030c49a4b4491c85337dec4c2f9771bc2d89164a3e6230b3",
     "icon.svg": "1ee8f4cf7d4dbb6162bce94f53852a6bb2b483b72a2e1b6e256607542e3ea9be",
-    "sw.js": "3cf672e345e9f14431154820a77bebc5ff2fa978a8be098c6e4c29006e6b33c9",
-    "src/app.js": "8ddf2c14886b33c577e222f621db7791a759bddd6bb8e169af2c0b77324ce6cf",
+    "sw.js": "9384f613b30daec59daa3565a4ccd9d4b92bb9c57b7448d7518b70525b034ea8",
+    "src/app.js": "b6f3178ea0fa9373910652ba2a50514e37dce3d508fc16d00fcc535177cb966e",
     "src/core.js": "0bb27ea410403d05bc196629123ef7c76763bacda29bcaf2c33c51212fda5ab5",
     "src/storage.js": "6952b62ca69fd46292098a4c05170597447a6f00a4d6be1ca57b6b392d8ce706",
     "src/demo.js": "5303e108056c026a36a67a88dc03a51cf4b5bed36ee284a29db221503de28903",
     "src/output.js": "fdd470fa8807309450b066463da31da4b11c82e5be52abd71ad2ee3e865f816d",
     "comparison.html": "427a9e72a3307bfb76b64199cdfcf87481f22b449689a6715b5a51f2acb342a3",
     "mobile.html": "427a9e72a3307bfb76b64199cdfcf87481f22b449689a6715b5a51f2acb342a3",
-    "prancheta.json": "1f8f67595e9a3bf665d89926f4a370897033174319d96c1ca7f97f156a26050b"
+    "prancheta.json": "3dc5a2e833f6e8f6f7f3661ace5b27fb52690b27ab113808b322830821f6576b"
   },
   "hashScope": "All generated files except this self-describing manifest. Source hashes bind current root bytes; no Git or wall-clock input is required."
 }
