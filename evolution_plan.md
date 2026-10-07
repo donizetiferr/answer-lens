@@ -6,6 +6,8 @@ Curadoria: 2026-10-06 — 0 fechados / 1 novo · aprofundamento da jornada offli
 
 Curadoria: 2026-10-06 — 0 fechados / 1 novo · backlog anterior executado; Q5, contratos em dois motores independentes. Sem mudança de escopo de produto.
 
+Curadoria: 2026-10-06 — 0 fechados / 0 novos · AMBOS final, 17/17 grupos cobertos; Inbox vazio e todos os achados Q1–Q6 executados pelo full-cycle. Fechamentos anteriores têm commit/prova em orchestration/delivered_items.md; nenhum item podado ou revogado.
+
 ## Inbox (apontamentos a triar)
 
 Vazio. O despacho do dono autoriza execução no branch queima-0610 até 07/10 04:00 BRT, ou esgotamento material. Sem cliente/terceiro, compra, credencial ou produção. Teste real, commit e push por item.

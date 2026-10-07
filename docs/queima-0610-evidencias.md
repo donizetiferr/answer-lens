@@ -61,3 +61,5 @@ No [run 37554023698](https://github.com/donizetiferr/answer-lens/actions/runs/37
 Um novo teste segura um Web Lock real depois de salvar. Reset deve esvaziar a tela e retirar consentimento, mas anunciar `clearing` e manter os bytes salvos enquanto a exclusão aguarda. Depois da liberação, exige `tab`, remoção efetiva, key alheia intacta e texto novo digitado durante a espera preservado. Complementa a regressão existente de salvar enquanto o lock está ocupado.
 
 Direcionados: 3/3 passes, zero skips. `npm run test:browser`: 51/51 passes, zero falhas/skips. Esse item resolve falha comprovada do CI; não se ocultou o run vermelho por mera repetição. A próxima execução hospedada verificará todos os cinco jobs.
+
+Fechamento hospedado: [run 37554313868](https://github.com/donizetiferr/answer-lens/actions/runs/37554313868), código `947ec7e`, ficou verde nos cinco jobs: Node 22/24, Chromium 51/51, Firefox 4/4 e WebKit 4/4. [Secret scan 37554313883](https://github.com/donizetiferr/answer-lens/actions/runs/37554313883) também passou. Confirma Q5/Q6 e todos os contratos anteriores no runner Ubuntu sem adaptações do host local.
