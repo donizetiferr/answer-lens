@@ -39,3 +39,17 @@ A consulta por MessageChannel envia somente um tipo fixo de pedido e recebe um b
 TELA: localhost, rascunho salvo com cache removido/incompleto | VI: Saved on this device continua verdadeiro, campos e respostas preservados; rodapé informa Offline cache unavailable · keep this tab open, inclusive em 320px. Capturas inspecionadas: [desktop](design_refs/queima-0610/offline-unavailable-desktop.png), [mobile](design_refs/queima-0610/offline-unavailable-mobile.png). Nivel: COMPLETO, sem alteração da direção visual.
 
 O [run 37552732805](https://github.com/donizetiferr/answer-lens/actions/runs/37552732805), commit `32489bb`, ficou verde: Node 22, Node 24 e todas as 47 jornadas Chromium, incluindo a captura real do favicon. O Secret scan também passou. Isso confirma Q2 e Q2-R no runner hospedado. O run intermediário de `c5c36f3` foi cancelado pelo push seguinte, não contado como sucesso.
+
+O [run 37553277831](https://github.com/donizetiferr/answer-lens/actions/runs/37553277831), commit `6b83258`, passou em Node 22/24 e todas as 50 jornadas Chromium. Secret scan também passou.
+
+## Q5 — portabilidade essencial
+
+`BROWSER_ENGINE=<engine> npm run test:portability`: 4/4 passes em cada motor (Chromium 153.0.8010.12, Firefox 155.0, WebKit 26.6), zero falhas/skips, exceções da aplicação, requests externos ou métodos de envio. Gate Node: 61/61. Os três motores ofereceram Web Locks/service worker em localhost seguro; o teste também contém as verificações de fallback quando ausentes, sem inventar que esse ramo rodou nos três.
+
+A prova inclui origens ausentes do DOM/árvore acessível antes do veredito, erro/foco ao revelar sem escolha, texto com markup inerte, clipboard realmente negado, download recebido e validado pelo schema, reimportação revelada sem saving, cancelamento/continuação só com pergunta, 320px sem overflow e rascunho consentido restaurado com a origem desligada. Uma aba nova sem worker precisa falhar nesse mesmo origin antes do reload positivo; não há interceptação/mocks no teste offline.
+
+A primeira execução WebKit passou em 3/4 e falhou no reload após `setOffline(true)`. A [falha upstream #42775](https://github.com/microsoft/playwright/issues/42775) reproduz o mesmo erro até com resposta literal do worker na versão 1.63. O contrato agora desliga o servidor real nos três motores. A emulação defeituosa não foi transformada em skip, nem exige mudar o produto.
+
+TELA: localhost, resultado sintético realmente baixado e reimportado | VI: fontes só no resultado, razão como texto, avaliações omitidas, saving off; ações/colunas legíveis em 1440px e empilhadas sem corte em 320px. Capturas inspecionadas: [Firefox desktop](design_refs/queima-0610/firefox-result-1440.png), [Firefox estreito](design_refs/queima-0610/firefox-result-320.png), [WebKit desktop](design_refs/queima-0610/webkit-result-1440.png), [WebKit estreito](design_refs/queima-0610/webkit-result-320.png). Nivel: COMPLETO, alvo INTERNO. Linux/viewport não é certificação Safari, celular físico, Windows ou leitor de tela.
+
+Neste VPS, binários/bibliotecas ficaram em `evidence/` ignorado, extraídos de pacotes sem instalação global. O wrapper local do WebKit foi ajustado somente para preservar `LD_LIBRARY_PATH`; `libx264.so` foi carregada via ctypes antes de desativar a validação heurística de host do SDK nessa execução local. O browser real e todas as asserções rodaram. Esse ajuste/variável não foi incluído no workflow: o runner Ubuntu instala dependências oficiais do Playwright. CI de Firefox/WebKit será conferido após push.

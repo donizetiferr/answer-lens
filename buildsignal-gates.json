@@ -32,7 +32,17 @@
       "tests/offline.browser.test.mjs"
     ],
     "browser_command": "npm run test:browser",
-    "requirements": "Server checks use temporary loopback sockets. Browser checks additionally require the pinned development-only Playwright package and an installed Chrome/Chromium. Neither belongs in the isolated gate test_files."
+    "requirements": "Server checks use temporary loopback sockets. Browser checks additionally require the pinned development-only Playwright package and an installed Chrome/Chromium. Neither belongs in the isolated gate test_files.",
+    "portability_test_files": [
+      "tests/portability.browser.test.mjs"
+    ],
+    "portability_command": "npm run test:portability",
+    "portability_engines": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "portability_requirements": "BROWSER_ENGINE selects the installed pinned Playwright engine. Real Linux desktop/narrow-view and saved/offline workflows; each run has its own loopback origin and context. Not physical Safari, mobile, Windows or screen-reader certification."
   },
   "evidence_file": "docs/evidence.md",
   "differentiation_file": "docs/differentiation.md",

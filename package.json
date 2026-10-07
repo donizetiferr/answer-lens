@@ -15,6 +15,7 @@
     "test:server": "node --test tests/server.test.mjs",
     "test:browser": "node --test --test-concurrency=1 tests/browser.test.mjs tests/evolution.browser.test.mjs tests/prototype.browser.test.mjs tests/offline.browser.test.mjs",
     "test:all": "npm test && npm run test:server && npm run test:browser",
+    "test:portability": "node --test tests/portability.browser.test.mjs",
     "prototype:sync": "node scripts/sync-prototype.mjs --write",
     "prototype:check": "node scripts/sync-prototype.mjs --check",
     "prototype:serve": "node scripts/serve-prototype.mjs",

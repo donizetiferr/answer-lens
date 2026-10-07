@@ -1,2 +1,3 @@
 2026-10-06 21:21 BRT | solo-backlog | AMBOS · perfil PESSOAL, backlog ausente; 3 achados verificados, inventário dos arquivos rastreados; retorno ao full-cycle autorizado | Prova: orchestration/backlog_cobertura.md; git show 726f3bf:sw.js; git show 726f3bf:src/app.js
 2026-10-06 21:30 BRT | solo-backlog | PROSPECCAO · Q4, prontidão offline falsa após remoção do shell; caller continua full-cycle no escopo autorizado | Prova: evidence/q4-reproduction.txt; src/app.js
+2026-10-06 21:41 BRT | solo-backlog | AMBOS · perfil PESSOAL; fila anterior concluída, Q5 pela restrição Chrome-only e documentação oficial; caller executa dentro da autoridade do despacho | Prova: docs/prototype-verification.json; tests/browser.test.mjs; https://playwright.dev/docs/browsers

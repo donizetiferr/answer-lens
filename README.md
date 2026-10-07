@@ -117,11 +117,25 @@ npx --no-install playwright install --with-deps chromium
 npm run test:browser
 # Alternatively, use your already-installed Chrome:
 # CHROME_PATH=/path/to/chrome npm run test:browser
-# All isolated, server and browser suites:
+# Node gates, server checks and the full Chromium suite:
 npm run test:all
 ```
 
 Pushes and pull requests run dependency-free gates and loopback server checks on Node 22 and 24, plus all Chromium journeys with the pinned Playwright browser on a hosted Ubuntu runner. The quality workflow has read-only repository permissions and does not deploy or upload artifacts.
+
+The separate essential-journey suite also runs on Firefox and WebKit Linux in CI. It checks hidden sources through verdict lock, clipboard-denied text, real JSON downloads/imports, question-only continuation, 320px layout, saving consent and an actual offline reload when the browser provides the required APIs. To reproduce it with the pinned browser binaries:
+
+```sh
+npx --no-install playwright install --with-deps firefox webkit
+BROWSER_ENGINE=firefox npm run test:portability
+BROWSER_ENGINE=webkit npm run test:portability
+# Optional equivalent contract check on Chromium:
+BROWSER_ENGINE=chromium npm run test:portability
+```
+
+The offline contract stops the temporary origin server and first requires a fresh, worker-blocked page to fail navigation; the saved, controlled page must then reload from its real cache. This avoids the [WebKit offline-emulation defect in Playwright 1.63](https://github.com/microsoft/playwright/issues/42775) without skipping offline coverage.
+
+These are Linux browser-engine checks. They do not certify the Safari application, Windows, physical mobile devices or a screen reader.
 
 Browser tests use isolated contexts and their own temporary loopback servers with teardown. They write synthetic-only captures and local receipts, not user data. Frozen v1 core/storage fixtures come from the prior commit and exercise real old validation/deletion behavior alongside v2; no compatibility repository is modified.
 
