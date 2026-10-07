@@ -119,11 +119,41 @@ test('local saving is opt-in; reload preserves the blind shuffle; reset clears o
     await page.click('#reset-button'); await page.keyboard.press('Escape');
     assert.equal(await page.locator('#verdict-form').count(), 1);
     await reset(page);
+    // Reset clears the view immediately; deletion finishes asynchronously under a Web Lock.
+    await page.waitForFunction(() => document.querySelector('#data-status').dataset.state === 'tab');
     assert.equal(await page.inputValue('#question'), ''); assert.equal(await page.inputValue('#answer-0'), ''); assert.equal(await page.inputValue('#answer-1'), '');
     assert.equal(await page.inputValue('#origin-0'), ''); assert.equal(await page.locator('#remember').isChecked(), false);
     assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), null);
     assert.deepEqual(await page.evaluate(() => [localStorage.getItem('unrelated-app-key'), sessionStorage.getItem('unrelated-session')]), ['keep', 'keep']);
     assert.equal(await page.locator('.answer-card').count(), 0);
+  } finally { await context.close(); }
+});
+
+test('reset reports deletion pending until a held Web Lock releases the actual saved copy', { timeout: 20000 }, async () => {
+  const { context, page } = await fixture();
+  try {
+    await demo(page); await page.check('#remember'); await saved(page);
+    const raw = await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY);
+    await page.evaluate(() => localStorage.setItem('unrelated-app-key', 'keep'));
+    const blocker = await context.newPage(); await blocker.goto(base);
+    await blocker.evaluate(() => {
+      navigator.locks.request('answer-lens-device-v2', () => new Promise(resolve => {
+        globalThis.releaseTestLock = resolve; globalThis.testLockHeld = true;
+      }));
+    });
+    await blocker.waitForFunction(() => globalThis.testLockHeld === true);
+    await reset(page);
+    assert.equal(await page.inputValue('#question'), '');
+    assert.equal(await page.locator('#remember').isChecked(), false);
+    assert.equal(await page.locator('#data-status').getAttribute('data-state'), 'clearing');
+    assert.match(await page.locator('#data-status').innerText(), /Removing/);
+    assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), raw);
+    await page.fill('#question', 'Synthetic new draft while deletion is pending.');
+    await blocker.evaluate(() => globalThis.releaseTestLock());
+    await page.waitForFunction(() => document.querySelector('#data-status').dataset.state === 'tab');
+    assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), null);
+    assert.equal(await page.evaluate(() => localStorage.getItem('unrelated-app-key')), 'keep');
+    assert.equal(await page.inputValue('#question'), 'Synthetic new draft while deletion is pending.');
   } finally { await context.close(); }
 });
 

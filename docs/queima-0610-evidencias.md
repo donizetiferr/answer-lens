@@ -53,3 +53,11 @@ A primeira execução WebKit passou em 3/4 e falhou no reload após `setOffline(
 TELA: localhost, resultado sintético realmente baixado e reimportado | VI: fontes só no resultado, razão como texto, avaliações omitidas, saving off; ações/colunas legíveis em 1440px e empilhadas sem corte em 320px. Capturas inspecionadas: [Firefox desktop](design_refs/queima-0610/firefox-result-1440.png), [Firefox estreito](design_refs/queima-0610/firefox-result-320.png), [WebKit desktop](design_refs/queima-0610/webkit-result-1440.png), [WebKit estreito](design_refs/queima-0610/webkit-result-320.png). Nivel: COMPLETO, alvo INTERNO. Linux/viewport não é certificação Safari, celular físico, Windows ou leitor de tela.
 
 Neste VPS, binários/bibliotecas ficaram em `evidence/` ignorado, extraídos de pacotes sem instalação global. O wrapper local do WebKit foi ajustado somente para preservar `LD_LIBRARY_PATH`; `libx264.so` foi carregada via ctypes antes de desativar a validação heurística de host do SDK nessa execução local. O browser real e todas as asserções rodaram. Esse ajuste/variável não foi incluído no workflow: o runner Ubuntu instala dependências oficiais do Playwright. CI de Firefox/WebKit será conferido após push.
+
+## Q6 — recibo de exclusão antes da asserção de Reset
+
+No [run 37554023698](https://github.com/donizetiferr/answer-lens/actions/runs/37554023698), Node 22/24 e WebKit passaram; Chromium passou em 49/50. A leitura em `tests/browser.test.mjs:124` ainda via a cópia anterior logo após aparecer o editor vazio, antes de a operação assíncrona sob Web Lock terminar. A correção espera o estado final `tab`, mantendo a exigência de localStorage nulo e keys alheias preservadas. O runtime não foi alterado.
+
+Um novo teste segura um Web Lock real depois de salvar. Reset deve esvaziar a tela e retirar consentimento, mas anunciar `clearing` e manter os bytes salvos enquanto a exclusão aguarda. Depois da liberação, exige `tab`, remoção efetiva, key alheia intacta e texto novo digitado durante a espera preservado. Complementa a regressão existente de salvar enquanto o lock está ocupado.
+
+Direcionados: 3/3 passes, zero skips. `npm run test:browser`: 51/51 passes, zero falhas/skips. Esse item resolve falha comprovada do CI; não se ocultou o run vermelho por mera repetição. A próxima execução hospedada verificará todos os cinco jobs.

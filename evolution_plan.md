@@ -21,6 +21,8 @@ Vazio. O despacho do dono autoriza execução no branch queima-0610 até 07/10 0
 
 - Q5 · FEITO · Validar contratos essenciais em Firefox e WebKit Linux. A suíte browser original importa somente Chromium (`tests/browser.test.mjs:7`, `tests/evolution.browser.test.mjs:8`); docs/prototype-verification.json declara limitação Chrome-only. Aceite: leitura cega e trava, clipboard negado, export/import real, continuação da pergunta, 320px e consentimento/save/offline conforme capacidades em ambos os motores; zero exceções, dados enviados ou skips. Nivel: COMPLETO · Alvo: INTERNO. objetivo_origem: PROSPECCAO. Prova: 4/4 jornadas em cada motor (Chromium 153, Firefox 155, WebKit 26.6), 61 gates Node; zero skips/exceções/dados enviados. Fonte externa: [Playwright Browsers](https://playwright.dev/docs/browsers): Firefox/WebKit e binários específicos da versão; permite verificar o runtime sem Windows/dispositivo físico.
 
+- Q6 · FEITO · O teste de Reset deve aguardar a exclusão assíncrona real. `tests/browser.test.mjs:124` lê localStorage antes de terminar clearOwnedData sob Web Lock. Origem: run 37554023698, job 112575942895 (49/50 Chromium passam). Aceite: esperar o recibo final, manter asserções de exclusão/keys alheias e exercitar lock retido; não mudar runtime para satisfazer uma espera incorreta. Prova: 3/3 direcionados e 51/51 Chromium completos, zero skips; teste novo mantém lock real até provar clearing/cópia salva, depois verifica exclusão e nova edição preservada. Nivel: COMPLETO · Alvo: INTERNO · objetivo_origem: PROSPECCAO.
+
 ## Pendências externas
 
 - Windows, dispositivos físicos e navegador autenticado: fora desta sessão; registrar necessidades concretas quando encontradas.
