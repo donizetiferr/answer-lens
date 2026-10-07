@@ -5,3 +5,4 @@ await import('../tests/storage.test.mjs');
 await import('../tests/demo.test.mjs');
 await import('../tests/evolution.test.mjs');
 await import('../tests/prototype.test.mjs');
+await import('../tests/offline.test.mjs');

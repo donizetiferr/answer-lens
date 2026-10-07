@@ -1,9 +1,10 @@
 // Reproduce the current catalog prototype from the root app. No packages or subprocesses.
-// --check is read-only; --write touches only the named collection's generated files.
+// --check is read-only; --write stamps the root worker and the collection's generated files.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
+import { stampShell, syncOffline } from './sync-offline.mjs';
 export const ROOT = fileURLToPath(new URL('../', import.meta.url));
 export const COLLECTION = 'docs/design_refs/answer-lens';
 export const PREVIEW = Object.freeze({
@@ -72,6 +73,8 @@ export async function expectedPrototype(root = ROOT) {
   // Cache the isolated bytes, not a previously cached v1 catalog copy.
   sw = once(sw, `\${PREFIX}${appVersion}`, `\${PREFIX}${appVersion}-catalog-r3-viewer`);
   output.set('sw.js', sw);
+  // Preview adaptations have their own bytes/revision, independent of root storage/cache.
+  output.set('sw.js', stampShell(output).worker);
   const resources = ['styles.css', 'icon.svg', 'sw.js', 'src/app.js', 'src/core.js', 'src/storage.js', 'src/demo.js', 'src/output.js'];
   const metadata = JSON.parse(await readFile(join(root, COLLECTION, 'prancheta.json'), 'utf8'));
   // Preserve the existing collection, start path, journey ID, screen ID, and design profile.
@@ -117,6 +120,7 @@ export async function expectedPrototype(root = ROOT) {
   return output;
 }
 export async function syncPrototype({ write = false, root = ROOT } = {}) {
+  await syncOffline({ write, root });
   const expected = await expectedPrototype(root); const drift = [];
   for (const [path, content] of expected) {
     const destination = join(root, COLLECTION, path);

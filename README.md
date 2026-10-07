@@ -26,7 +26,7 @@ node scripts/serve.mjs
 
 Open `http://127.0.0.1:4173`. Use `PORT=4180 node scripts/serve.mjs` for a different local port; stop with Ctrl+C. The server serves only a fixed app-file allowlist, not the repository. Do not double-click `index.html`: browser modules need a local HTTP origin or HTTPS.
 
-After **Offline app ready**, the app shell is cached for later offline reloads on the same origin. This is separate from saving your comparison. A different browser/origin/port, browser eviction, or clearing site data can remove stored data or offline availability.
+After **Offline app ready**, the app shell is cached for later offline reloads on the same origin. Each shell revision is tied to the shipped asset bytes, including the worker itself. A successful update replaces only this app’s previous shell cache; it preserves saved comparisons and other applications’ caches. Open work is never automatically reloaded. An interrupted shell download leaves the previous installed version usable. This is separate from saving your comparison. A different browser/origin/port, browser eviction, or clearing site data can remove stored data or offline availability.
 
 ## Compare without filling out a questionnaire
 
@@ -93,7 +93,7 @@ node scripts/serve-prototype.mjs
 
 Open `http://127.0.0.1:4181/docs/design_refs/answer-lens/comparison.html` while that loopback-only server runs. Both entries support the actual local workflow. The preview has separate v2/v1 storage keys, a separate Web Lock and a scoped cache; it does not open the main application's saved comparison.
 
-After intentional runtime changes, `node scripts/sync-prototype.mjs --write` refreshes this same collection. The read-only check fails on drift and is included in the isolated Node gates. [Design documentation](docs/DESIGN.md) explains the exact adaptations; [round-3 evidence](docs/prototype-evidence.md) records full browser journeys and same-origin isolation. Earlier images and video remain unchanged; no new video or deployment is part of this round.
+After intentional runtime changes, `node scripts/sync-prototype.mjs --write` stamps the root offline revision and refreshes this same collection, including its separate shell revision. The read-only check fails on runtime or offline-revision drift and is included in the isolated Node gates. [Design documentation](docs/DESIGN.md) explains the exact adaptations; [round-3 evidence](docs/prototype-evidence.md) records full browser journeys and same-origin isolation. Earlier images and video remain unchanged; no new video or deployment is part of this round.
 
 ## Tests and evidence
 

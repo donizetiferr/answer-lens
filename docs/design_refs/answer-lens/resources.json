@@ -1,12 +1,12 @@
 {
   "schema": "answer-lens-preview-resources/1",
   "appVersion": "2.0.0",
-  "sourceTreeSha256": "4bd10f0eba1e98644e7a7b8305ad0280413808ca768b67ca763ec0233e4e6240",
+  "sourceTreeSha256": "882ef922fc77344f8cc1255f4fd48d5f1a6a371f57480ba82333fb581b886237",
   "sourceHashes": {
     "index.html": "76c0a3d97ef64586b4ffe353fc6a053dfb2a0c0f8d8b24e6412dc5498b32b22a",
     "styles.css": "5fc5dd9bad5ca69f030c49a4b4491c85337dec4c2f9771bc2d89164a3e6230b3",
     "icon.svg": "1ee8f4cf7d4dbb6162bce94f53852a6bb2b483b72a2e1b6e256607542e3ea9be",
-    "sw.js": "9aa9231023babbb9d8e16db56e97823d9942a476cd02ffaef3365c75a5eb4289",
+    "sw.js": "a80e6f960a2705fc3afa9e7155f26272b1a2a83a0c17d64212379f9d9dc108ac",
     "src/app.js": "760858511ea4157532d395a64021fc16697c22df0f529f55f000df49efcf44d7",
     "src/core.js": "0bb27ea410403d05bc196629123ef7c76763bacda29bcaf2c33c51212fda5ab5",
     "src/storage.js": "393609869a13a7bece42f5f6d8e8dbf088614485413d3037a8bb6ff4f4a49339",
@@ -31,7 +31,7 @@
     "index.html": "427a9e72a3307bfb76b64199cdfcf87481f22b449689a6715b5a51f2acb342a3",
     "styles.css": "5fc5dd9bad5ca69f030c49a4b4491c85337dec4c2f9771bc2d89164a3e6230b3",
     "icon.svg": "1ee8f4cf7d4dbb6162bce94f53852a6bb2b483b72a2e1b6e256607542e3ea9be",
-    "sw.js": "888b4a8876f5cc33abe5a599be586dc10838fd65e612102dccade0953510cba2",
+    "sw.js": "3cf672e345e9f14431154820a77bebc5ff2fa978a8be098c6e4c29006e6b33c9",
     "src/app.js": "8ddf2c14886b33c577e222f621db7791a759bddd6bb8e169af2c0b77324ce6cf",
     "src/core.js": "0bb27ea410403d05bc196629123ef7c76763bacda29bcaf2c33c51212fda5ab5",
     "src/storage.js": "6952b62ca69fd46292098a4c05170597447a6f00a4d6be1ca57b6b392d8ce706",
@@ -39,7 +39,7 @@
     "src/output.js": "fdd470fa8807309450b066463da31da4b11c82e5be52abd71ad2ee3e865f816d",
     "comparison.html": "427a9e72a3307bfb76b64199cdfcf87481f22b449689a6715b5a51f2acb342a3",
     "mobile.html": "427a9e72a3307bfb76b64199cdfcf87481f22b449689a6715b5a51f2acb342a3",
-    "prancheta.json": "34652c944b429619f1e10d5ce5c580faa853252f4a764069d49cb9a936a11b54"
+    "prancheta.json": "1f8f67595e9a3bf665d89926f4a370897033174319d96c1ca7f97f156a26050b"
   },
   "hashScope": "All generated files except this self-describing manifest. Source hashes bind current root bytes; no Git or wall-clock input is required."
 }

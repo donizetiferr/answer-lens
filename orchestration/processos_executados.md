@@ -1,0 +1,1 @@
+2026-10-06 21:21 BRT | solo-backlog | AMBOS · perfil PESSOAL, backlog ausente; 3 achados verificados, inventário dos arquivos rastreados; retorno ao full-cycle autorizado | Prova: orchestration/backlog_cobertura.md; git show 726f3bf:sw.js; git show 726f3bf:src/app.js
