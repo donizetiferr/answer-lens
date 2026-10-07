@@ -19,3 +19,7 @@ A verificação aguarda o estado `activated` do controlador antes de julgar a li
 A execução mais rápida mostrou uma asserção preexistente que lia o erro antes do término de `File.text()`. O teste agora espera o alerta real, sem sleeps ou relaxar a mensagem esperada; a regressão direcionada e a suíte inteira passaram. O workflow executa gates em processo único com permissão de leitura restrita, servidores loopback e jornadas Chromium. Nenhuma ação de deploy, credencial ou upload de relatório foi acrescentada. Execução hospedada será anotada após push. Nivel: COMPLETO, alvo INTERNO.
 
 O Secret scan do primeiro item passou no [run 37552160147](https://github.com/donizetiferr/answer-lens/actions/runs/37552160147), commit `284cd7a`.
+
+### Q2-R — captura do favicon no runner
+
+O [primeiro run de qualidade](https://github.com/donizetiferr/answer-lens/actions/runs/37552417010) passou nos dois jobs Node e em 43 de 44 jornadas Chromium. A última falhou em `Page.captureScreenshot` de um documento SVG standalone, depois de as duas decodificações 48×48 passarem. A correção mantém a decodificação e captura o mesmo SVG via elemento `img` numa página HTML real. Teste local direcionado: 1/1 pass, sem skips. O próximo run valida a correção no runner original; não se declara o primeiro run verde.

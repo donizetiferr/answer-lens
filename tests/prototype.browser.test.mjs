@@ -254,6 +254,13 @@ test('root and preview favicon assets decode as actual SVG images', async () => 
       }));
       assert.deepEqual(decoded, [48, 48], 'A favicon must decode, not just return HTTP 200');
     }
-    await page.screenshot({ path: join(ROOT, 'evidence/round3/favicon.local.png') });
+    // Some headless builds cannot capture a standalone SVG document. Keep the
+    // actual decode checks above, then capture the same image in an HTML page.
+    await page.goto(base);
+    await page.evaluate(async prefix => {
+      const image = new Image(); image.id = 'favicon-capture'; image.src = `${prefix}icon.svg`;
+      await image.decode(); document.body.append(image);
+    }, PREVIEW_PATH);
+    await page.locator('#favicon-capture').screenshot({ path: join(ROOT, 'evidence/round3/favicon.local.png') });
   } finally { await dispose(context); }
 });
