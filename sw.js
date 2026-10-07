@@ -1,6 +1,6 @@
 // App shell only: never cache user answers, exports, or arbitrary requests.
 const PREFIX = `answer-lens-shell:${new URL(self.registration.scope).pathname}:`;
-const CACHE = `${PREFIX}2.0.0-shell-14a8335f4bb8339516ab153597d3089139e8b80515a52eadc7a66c19fb1c433c`;
+const CACHE = `${PREFIX}2.0.0-shell-ca3e0adf8fcc1181b520a62a5a29387bcac53fb79a3cd3520145dcf38bdc92c7`;
 const FILES = ['./', './index.html', './styles.css', './icon.svg', './src/app.js', './src/core.js', './src/storage.js', './src/demo.js', './src/output.js'];
 const URLS = new Set(FILES.map(path => new URL(path, self.registration.scope).href));
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting())));
@@ -14,4 +14,11 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || !URLS.has(url.href)) return;
   // A late request from the previous worker must not recreate its deleted cache.
   event.respondWith(caches.match(url.href, { cacheName: CACHE }).then(cached => cached || fetch(event.request)));
+});
+// Read-only readiness receipt: no user data is included or cached by this message.
+self.addEventListener('message', event => {
+  if (event.data?.type !== 'answer-lens-shell-status' || !event.ports[0]) return;
+  const reply = available => event.ports[0].postMessage({ type: 'answer-lens-shell-status', available });
+  event.waitUntil(Promise.all([...URLS].map(url => caches.match(url, { cacheName: CACHE })))
+    .then(entries => reply(entries.every(Boolean))).catch(() => reply(false)));
 });

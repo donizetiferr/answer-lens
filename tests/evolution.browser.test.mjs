@@ -489,6 +489,51 @@ test('a delayed import cannot replace a newer reset confirmation', async () => {
   } finally { await context.close(); }
 });
 
+for (const damage of ['removed', 'incomplete']) {
+  test(`offline readiness refuses a ${damage} shell while preserving the saved draft`, { timeout: 15000 }, async () => {
+    const { context, page } = await fixture({ viewport: damage === 'removed' ? { width: 1440, height: 1000 } : { width: 320, height: 844 } });
+    try {
+      await page.waitForFunction(() => navigator.serviceWorker.controller?.state === 'activated' && document.querySelector('#offline-status').textContent.includes('Offline app ready'));
+      await page.click('#demo-button'); await page.check('#remember'); await saved(page);
+      const prior = await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY);
+      await page.evaluate(async damage => {
+        const key = (await caches.keys()).find(key => key.startsWith('answer-lens-shell:'));
+        if (damage === 'removed') await caches.delete(key);
+        else await (await caches.open(key)).delete(new URL('./src/output.js', location.href).href);
+      }, damage);
+      await page.reload(); await page.waitForSelector('#question');
+      await page.waitForFunction(() => document.querySelector('#offline-status').textContent.includes('Offline cache unavailable'), null, { timeout: 5000 });
+      assert.equal(await page.inputValue('#question'), JSON.parse(prior).question);
+      assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), prior);
+      assert.equal(await page.locator('#data-status').getAttribute('data-state'), 'saved');
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+      if (damage === 'removed') assert.deepEqual(await page.evaluate(() => caches.keys()), []);
+      await page.locator('#question').focus();
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await capture(page, `offline-${damage}`, 'Saved draft remains usable online; offline status refuses readiness after synthetic cache damage.', true);
+    } finally { await context.close(); }
+  });
+}
+
+test('a worker that cannot confirm its cache does not advertise offline readiness', { timeout: 15000 }, async () => {
+  const { context, page } = await fixture({ init: () => {
+    if (!globalThis.ServiceWorker) return; // Initial about:blank is not a secure worker context.
+    globalThis.offlineTestWorkerShim = true;
+    const original = ServiceWorker.prototype.postMessage;
+    ServiceWorker.prototype.postMessage = function(message, ...args) {
+      if (message?.type === 'answer-lens-shell-status') return;
+      return original.call(this, message, ...args);
+    };
+  } });
+  try {
+    assert.equal(await page.evaluate(() => globalThis.offlineTestWorkerShim), true);
+    await page.waitForFunction(() => document.querySelector('#offline-status').textContent.includes('Offline cache unavailable'), null, { timeout: 5000 });
+    await page.click('#demo-button'); await page.click('#begin-button'); await reveal(page, 'tie');
+    assert.match(await page.locator('#offline-status').innerText(), /keep this tab open/);
+    assert.equal(await page.locator('.origin').count(), 2);
+  } finally { await context.close(); }
+});
+
 test('evolution journeys emitted no app exceptions, external requests or outgoing data requests', () => {
   assert.deepEqual(errors, []); assert.deepEqual(externalRequests, []); assert.deepEqual(nonGetRequests, []);
 });

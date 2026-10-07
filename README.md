@@ -26,6 +26,8 @@ node scripts/serve.mjs
 
 Open `http://127.0.0.1:4173`. Use `PORT=4180 node scripts/serve.mjs` for a different local port; stop with Ctrl+C. The server serves only a fixed app-file allowlist, not the repository. Do not double-click `index.html`: browser modules need a local HTTP origin or HTTPS.
 
+The footer checks with the active worker that every app-shell asset is still cached before it reports **Offline app ready**. A missing/incomplete cache or an unanswered check reports **Offline cache unavailable**; keep the tab open and copy/export before leaving. The check runs on load, worker changes and returning to the tab. It is a snapshot, since browsers can evict cached data afterward.
+
 After **Offline app ready**, the app shell is cached for later offline reloads on the same origin. Each shell revision is tied to the shipped asset bytes, including the worker itself. A successful update replaces only this app’s previous shell cache; it preserves saved comparisons and other applications’ caches. Open work is never automatically reloaded. An interrupted shell download leaves the previous installed version usable. This is separate from saving your comparison. A different browser/origin/port, browser eviction, or clearing site data can remove stored data or offline availability.
 
 ## Compare without filling out a questionnaire
@@ -48,7 +50,7 @@ Your **verdict is required**: prefer A, prefer B, call a tie, or choose neither.
 
 **Copy preferred answer** is available only for A or B, never for a tie or neither. It copies the complete selected answer. Synthetic demo answers receive an explicit synthetic prefix. Clipboard access happens only after your click. When permission is denied or the API is absent, the app exposes a labelled, selectable plain-text fallback; no remote service is used.
 
-**Export full result JSON** remains the complete portable record, including both answers and the recorded shuffle. **Open a saved JSON** reads locally, opens an already-revealed result and never silently enables saving. Both genuine v1 exports and v2 results with no, partial or full ratings are accepted under their respective contracts.
+**Export full result JSON** remains the complete portable record, including both answers and the recorded shuffle. **Open a saved JSON** reads locally, opens an already-revealed result and never silently enables saving. Both genuine v1 exports and v2 results with no, partial or full ratings are accepted under their respective contracts. Cancelling preserves your draft and lets you select the same file again. A file still being read cannot replace a later confirmation you opened.
 
 **Another pair for this question** asks for confirmation before replacing the result. Copy or export first. Cancelling changes nothing. Confirming retains **only the question**: no answers, origins, ratings, reason, verdict, demo flag, saving consent, timestamps or assignment carry over. A fresh assignment is recorded when the next pair begins. This is a new personal decision, not proof that a revised prompt or model is generally better.
 

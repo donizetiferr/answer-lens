@@ -398,9 +398,32 @@ window.addEventListener('beforeunload', event => {
 render();
 if (loaded.message) say(loaded.message);
 else if (loaded.session) say('Restored the comparison you chose to save on this device.');
+let offlineTicket = 0;
+async function checkOfflineShell(worker) {
+  const ticket = ++offlineTicket;
+  $('#offline-status').textContent = 'Checking offline app…';
+  let available = false;
+  try {
+    available = await new Promise(resolve => {
+      const channel = new MessageChannel();
+      const finish = value => { clearTimeout(timeout); channel.port1.close(); channel.port2.close(); resolve(value); };
+      const timeout = setTimeout(() => finish(false), 3000);
+      channel.port1.onmessage = event => finish(event.data?.type === 'answer-lens-shell-status' && event.data.available === true);
+      channel.port1.onmessageerror = () => finish(false);
+      try { worker.postMessage({ type: 'answer-lens-shell-status' }, [channel.port2]); }
+      catch { finish(false); }
+    });
+  } catch { /* The tab remains usable without worker messaging support. */ }
+  if (ticket === offlineTicket) $('#offline-status').textContent = available
+    ? `Offline app ready · v${VERSION}` : 'Offline cache unavailable · keep this tab open';
+}
 if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => checkOfflineShell(navigator.serviceWorker.controller));
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && navigator.serviceWorker.controller) checkOfflineShell(navigator.serviceWorker.controller);
+  });
   navigator.serviceWorker.register('./sw.js').then(async () => {
-    await navigator.serviceWorker.ready;
-    $('#offline-status').textContent = `Offline app ready · v${VERSION}`;
+    const registration = await navigator.serviceWorker.ready;
+    await checkOfflineShell(registration.active);
   }).catch(() => { $('#offline-status').textContent = 'Offline cache unavailable · keep this tab open'; });
 } else $('#offline-status').textContent = 'Offline cache unsupported · keep this tab open';
