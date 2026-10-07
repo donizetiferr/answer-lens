@@ -10,7 +10,7 @@ Arquivos: `.gitattributes`, `.gitignore`, `.nojekyll`, `LICENSE`, `README.md`, `
 
 ## integração contínua
 
-Estado: NAO analisado
+Estado: com achado — Q2; faltavam gates e jornadas. Workflow hospedado, read-only, Node 22/24 e Chromium, sem deploy/artifacts.
 
 Arquivos: `.github/workflows/public-security.yml`
 

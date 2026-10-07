@@ -111,10 +111,15 @@ Actual UI/server checks are separate. Playwright is pinned as a development-only
 ```sh
 node --test tests/server.test.mjs
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm ci --ignore-scripts
-CHROME_PATH=/usr/bin/google-chrome npm run test:browser
+npx --no-install playwright install --with-deps chromium
+npm run test:browser
+# Alternatively, use your already-installed Chrome:
+# CHROME_PATH=/path/to/chrome npm run test:browser
 # All isolated, server and browser suites:
 npm run test:all
 ```
+
+Pushes and pull requests run dependency-free gates and loopback server checks on Node 22 and 24, plus all Chromium journeys with the pinned Playwright browser on a hosted Ubuntu runner. The quality workflow has read-only repository permissions and does not deploy or upload artifacts.
 
 Browser tests use isolated contexts and their own temporary loopback servers with teardown. They write synthetic-only captures and local receipts, not user data. Frozen v1 core/storage fixtures come from the prior commit and exercise real old validation/deletion behavior alongside v2; no compatibility repository is modified.
 

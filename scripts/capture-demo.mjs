@@ -12,7 +12,7 @@ await mkdir(destination); // New destination only; never overwrite a prior captu
 // Keep standalone Node alive while the browser pipe has no referenced handles.
 // The test runner had its own HTTP server keeping the event loop alive.
 const deadline = setTimeout(() => { console.error('Demo capture exceeded 60 seconds.'); process.exit(1); }, 60000);
-const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', headless: true });
+const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || undefined, headless: true });
 const context = await browser.newContext({ viewport: { width: 1152, height: 720 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
 const page = await context.newPage();
 const records = [], requests = [], errors = [];

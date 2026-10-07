@@ -28,7 +28,7 @@ before(async () => {
     response.end(path === rejected ? 'Unavailable during synthetic upgrade' : body ?? 'Not found');
   });
   server.listen(0, '127.0.0.1'); await once(server, 'listening'); base = `http://127.0.0.1:${server.address().port}`;
-  browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', headless: true });
+  browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || undefined, headless: true });
 });
 after(async () => {
   await browser?.close();

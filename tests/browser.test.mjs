@@ -15,7 +15,7 @@ const evidence = join(ROOT, process.env.ANSWER_LENS_REGRESSION_EVIDENCE || 'evid
 before(async () => {
   await mkdir(media, { recursive: true }); await mkdir(evidence, { recursive: true });
   server = createAppServer(); server.listen(0, '127.0.0.1'); await once(server, 'listening'); base = `http://127.0.0.1:${server.address().port}`;
-  browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', headless: true });
+  browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || undefined, headless: true });
 });
 after(async () => {
   if (browser) await browser.close();
@@ -226,6 +226,7 @@ test('corrupt saved state and invalid imported files give useful errors without 
     assert.match(await page.locator('#data-status').innerText(), /untouched/); assert.equal(await page.inputValue('#question'), '');
     assert.equal(await page.evaluate(key => localStorage.getItem(key), STORAGE_KEY), '{broken');
     await page.setInputFiles('#import-file', { name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
+    await page.waitForSelector('#error:not([hidden])');
     assert.match(await page.locator('#error').innerText(), /not an Answer Lens result/);
   } finally { await context.close(); }
 });

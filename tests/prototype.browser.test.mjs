@@ -19,7 +19,7 @@ before(async () => {
   await syncPrototype(); await mkdir(OUT, { recursive: true });
   await mkdir(join(ROOT, 'evidence/round3'), { recursive: true });
   server = createPrototypeServer(); server.listen(0, '127.0.0.1'); await once(server, 'listening'); base = `http://127.0.0.1:${server.address().port}`;
-  browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', headless: true });
+  browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || undefined, headless: true });
 });
 after(async () => {
   for (const context of contexts) await context.close();
