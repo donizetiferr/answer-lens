@@ -177,6 +177,9 @@ function renderSetup() {
 }
 async function openResult(event) {
   const file = event.target.files?.[0]; if (!file) return;
+  // Keep the File while releasing the picker selection. After cancelling the
+  // replacement dialog, choosing this same file must still fire a new change.
+  event.target.value = '';
   const request = ++fileTicket, view = viewTicket;
   clearError();
   try {
@@ -189,7 +192,7 @@ async function openResult(event) {
     else apply();
   } catch (error) {
     if (request !== fileTicket || view !== viewTicket) return;
-    fail(error.message); event.target.value = '';
+    fail(error.message);
   }
 }
 

@@ -7,6 +7,7 @@ import { decisionNote, preferredAnswer, ratingText } from '../src/output.js';
 import { STORAGE_KEY, LEGACY_KEY, saveLocal, clearLocal, loadLocal, loadLegacy } from '../src/storage.js';
 import * as v1 from './fixtures/v1/core.js';
 import * as v1Storage from './fixtures/v1/storage.js';
+import { appFixture } from './fixtures/app.mjs';
 const start = '2026-09-21T07:00:00.000Z', end = '2026-09-21T07:01:00.000Z';
 const blind = () => beginBlind(demoSession(), { seed: 1, now: start });
 const result = () => lockAndReveal(blind(), 'B', 'The steps help with this question.', end);
@@ -75,6 +76,46 @@ test('next pair retains exactly the question, not consent, answers, source names
   const next = nextPair(s);
   assert.deepEqual(next, { ...emptySession(), question: s.question });
   assert.equal(s.phase, 'revealed'); assert.equal(s.remember, true);
+});
+test('cancelling a valid import lets the same file be selected again without losing the draft', async () => {
+  const app = await appFixture();
+  await app.input('#question', 'Keep this draft unless I confirm.');
+  const json = exportResult(result());
+  const file = { name: 'result.json', size: Buffer.byteLength(json), text: async () => json };
+  assert.equal(await app.chooseFile(file), true);
+  assert.equal(app.get('#reset-dialog').open, true);
+  await app.get('#cancel-reset').click();
+  assert.equal(app.get('#question').value, 'Keep this draft unless I confirm.');
+  assert.equal(await app.chooseFile(file), true, 'The same valid result must be selectable after cancelling.');
+  assert.equal(app.get('#reset-dialog').open, true);
+  assert.equal(app.data.size, 0, 'Opening or cancelling must not silently opt into saving.');
+});
+test('invalid and oversized files can be retried and do not replace the current draft', async () => {
+  const app = await appFixture(); await app.input('#question', 'Current draft');
+  let reads = 0;
+  for (const file of [
+    { name: 'invalid.json', size: 1, text: async () => '{' },
+    { name: 'huge.json', size: 600001, text: async () => { reads++; return ''; } }
+  ]) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      assert.equal(await app.chooseFile(file), true);
+      assert.equal(app.get('#error').hidden, false);
+      assert.equal(app.get('#question').value, 'Current draft');
+      assert.equal(app.get('#reset-dialog').open, false);
+    }
+  }
+  assert.equal(reads, 0, 'An oversized file must be rejected before reading.');
+});
+test('a file read completed after the view changes cannot replace the new comparison', async () => {
+  const app = await appFixture(); let finish;
+  const json = exportResult(result());
+  const reading = app.chooseFile({ name: 'slow.json', size: json.length, text: () => new Promise(resolve => { finish = resolve; }) });
+  await app.get('#demo-button').click();
+  const question = app.get('#question').value;
+  finish(json); await reading;
+  assert.equal(app.get('#question').value, question);
+  assert.equal(app.get('#reset-dialog').open, false);
+  assert.equal(app.get('#export-button'), null);
 });
 test('an actual old v1 export migrates to v2 without changing its verdict or ratings', () => {
   const old = legacyResult(); const json = v1.exportResult(old); const upgraded = importResult(json);
