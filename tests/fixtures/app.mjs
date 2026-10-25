@@ -64,7 +64,7 @@ export function controlledLocks() {
     async drain() { while (pending.length) await this.release(); }
   };
 }
-export async function appFixture({ initial = null, legacy = null, locks = { request: async (_name, action) => action() } } = {}) {
+export async function appFixture({ initial = null, legacy = null, clipboard = null, locks = { request: async (_name, action) => action() } } = {}) {
   const document = {
     createElement(tag) { const node = new Element(tag); node.document = document; return node; },
     createTextNode: text => new Text(text),
@@ -86,7 +86,7 @@ export async function appFixture({ initial = null, legacy = null, locks = { requ
   const window = new Element(); window.scrollTo = () => {};
   const source = await readFile(new URL('../../src/app.js', import.meta.url), 'utf8');
   runInNewContext(source.replace(/^import .+;\n/gm, ''), {
-    ...core, ...storage, ...output, demoSession, document, localStorage, window, navigator: { locks },
+    ...core, ...storage, ...output, demoSession, document, localStorage, window, navigator: { locks, clipboard },
     // Module functions retain their own realm's default arguments. Bind reads
     // explicitly so they never use Node's global localStorage outside this VM.
     loadLocal: () => storage.loadLocal(() => localStorage),

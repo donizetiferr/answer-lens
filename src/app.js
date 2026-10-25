@@ -27,7 +27,7 @@ let protectedData = !!loaded.protected;
 let externalChanged = false;
 let dataState = protectedData ? 'protected' : loaded.session ? 'saved' : loaded.ok ? 'tab' : 'failed';
 let dataMessage = loaded.message || '';
-let saveTicket = 0, viewTicket = 0, fileTicket = 0;
+let saveTicket = 0, viewTicket = 0, fileTicket = 0, copyTicket = 0;
 let saveQueue = Promise.resolve();
 let navObserver;
 const say = message => { $('#status').textContent = message; };
@@ -271,15 +271,17 @@ function readingNav(revealed) {
     }));
 }
 async function copyOutput(kind) {
-  const ticket = viewTicket;
+  const ticket = viewTicket, request = ++copyTicket;
   const text = kind === 'answer' ? preferredAnswer(session) : decisionNote(session);
   const label = kind === 'answer' ? 'Preferred answer' : 'Decision note';
   try {
     if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
     await navigator.clipboard.writeText(text);
-    if (ticket === viewTicket) say(`${label} copied. Review it before sharing; it may contain private text.`);
+    if (ticket !== viewTicket || request !== copyTicket) return;
+    $('#copy-fallback').hidden = true; $('#copy-text').value = '';
+    say(`${label} copied. Review it before sharing; it may contain private text.`);
   } catch {
-    if (ticket !== viewTicket) return;
+    if (ticket !== viewTicket || request !== copyTicket) return;
     $('#copy-fallback').hidden = false; $('#copy-label').textContent = `${label} — select and copy`;
     $('#copy-text').value = text; $('#copy-text').focus(); $('#copy-text').select();
     say('Automatic copy is unavailable. The full plain text is selected below; use your device’s Copy command.');

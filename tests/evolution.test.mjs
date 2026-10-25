@@ -71,6 +71,70 @@ test('text outputs preserve hostile-looking content as plain strings', () => {
   assert.equal(preferredAnswer(s), text); assert.ok(decisionNote(s).includes(text));
   assert.equal(importResult(exportResult(s)).note, text);
 });
+test('an older clipboard failure cannot replace the feedback for a later successful copy', async () => {
+  let rejectFirst;
+  const copied = [];
+  const clipboard = { writeText(text) {
+    copied.push(text);
+    return copied.length === 1 ? new Promise((_resolve, reject) => { rejectFirst = reject; }) : Promise.resolve();
+  } };
+  const app = await appFixture({ initial: JSON.stringify({ ...result(), remember: true }), clipboard });
+  const first = app.get('#copy-note').click();
+  await app.get('#copy-answer').click();
+  assert.equal(copied[0], decisionNote(result()));
+  assert.equal(copied[1], preferredAnswer(result()));
+  assert.match(app.get('#status').textContent, /Preferred answer copied/);
+  rejectFirst(new Error('Delayed permission denial')); await first;
+  assert.equal(app.get('#copy-fallback').hidden, true);
+  assert.match(app.get('#status').textContent, /Preferred answer copied/);
+});
+test('a successful answer copy clears an older decision-note fallback', async () => {
+  const clipboard = { async writeText() { throw new Error('Permission denied'); } };
+  const app = await appFixture({ initial: JSON.stringify({ ...result(), remember: true }), clipboard });
+  await app.get('#copy-note').click();
+  assert.equal(app.get('#copy-fallback').hidden, false);
+  assert.equal(app.get('#copy-text').value, decisionNote(result()));
+  clipboard.writeText = async () => {};
+  await app.get('#copy-answer').click();
+  assert.equal(app.get('#copy-fallback').hidden, true);
+  assert.equal(app.get('#copy-text').value, '');
+  assert.match(app.get('#status').textContent, /Preferred answer copied/);
+});
+test('a late copy success preserves the newer answer fallback and its selection', async () => {
+  let finishFirst, calls = 0;
+  const clipboard = { writeText() {
+    if (++calls === 1) return new Promise(resolve => { finishFirst = resolve; });
+    return Promise.reject(new Error('The newer copy was denied'));
+  } };
+  const app = await appFixture({ initial: JSON.stringify({ ...result(), remember: true }), clipboard });
+  const first = app.get('#copy-note').click();
+  await app.get('#copy-answer').click();
+  const status = app.get('#status').textContent;
+  assert.equal(app.get('#copy-text').value, preferredAnswer(result()));
+  finishFirst(); await first;
+  assert.equal(app.get('#copy-fallback').hidden, false);
+  assert.equal(app.get('#copy-text').value, preferredAnswer(result()));
+  assert.equal(app.document.activeElement, app.get('#copy-text'));
+  assert.equal(app.get('#copy-text').selectionEnd, preferredAnswer(result()).length);
+  assert.equal(app.get('#status').textContent, status);
+});
+test('copy completion after reset never opens fallback or rewrites the new view status', async () => {
+  for (const rejected of [false, true]) {
+    let finish;
+    const clipboard = { writeText: () => new Promise((resolve, reject) => {
+      finish = () => rejected ? reject(new Error('Late denial')) : resolve();
+    }) };
+    const app = await appFixture({ initial: JSON.stringify({ ...result(), remember: true }), clipboard });
+    const copying = app.get('#copy-note').click();
+    await app.get('#reset-button').click(); await app.get('#confirm-reset').click(); await settleApp();
+    const status = app.get('#status').textContent;
+    finish(); await copying;
+    assert.equal(app.get('#copy-fallback'), null);
+    assert.equal(app.get('#question').value, '');
+    assert.equal(app.get('#status').textContent, status);
+    assert.equal(app.get('#error').hidden, true);
+  }
+});
 test('next pair retains exactly the question, not consent, answers, source names or demo status', () => {
   const s = result(); s.remember = true;
   const next = nextPair(s);
