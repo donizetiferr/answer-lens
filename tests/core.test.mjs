@@ -106,7 +106,8 @@ test('timestamps reject normalized calendar dates and timezone-dependent local t
 });
 test('timestamp validation preserves leap days and explicit timezone offsets', () => {
   for (const valid of ['2024-02-29T04:00:00.000Z', '2000-02-29T04:00:00Z',
-    '2026-09-21T01:00:00-03:00', '2026-09-21T06:00:00.123+02:00']) {
+    '2026-09-21T01:00:00-03:00', '2026-09-21T06:00:00.123+02:00',
+    '2026-09-21T04:00Z', '2026-09-21T04:00:00.123456Z', '2026-09-21T01:00:00-0300']) {
     const s = beginBlind(demoSession(), { seed: 0, now: valid });
     assert.equal(s.randomization.assignedAt, valid);
     assert.equal(lockAndReveal(s, 'A', '', valid).lockedAt, valid);

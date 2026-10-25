@@ -24,7 +24,7 @@ function iso(value) {
   if (typeof value !== 'string') return false;
   // An explicit zone makes exported chronology independent of the reader's
   // device. Date.parse alone silently normalizes impossible days into March.
-  const parts = /^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.exec(value);
+  const parts = /^(\d{4})-(\d{2})-(\d{2})T.*(?:Z|[+-]\d{2}:?\d{2})$/.exec(value);
   if (!parts || !Number.isFinite(Date.parse(value))) return false;
   const [, yearText, monthText, dayText] = parts;
   const year = Number(yearText), month = Number(monthText), day = Number(dayText);
