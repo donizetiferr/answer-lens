@@ -355,6 +355,9 @@ function render(focus = false) {
 }
 let pendingAction = null;
 function confirmAction(title, description, button, action) {
+  // A file selected before this choice must not replace the dialog's action or
+  // surface a stale read error while the user is deciding (or after cancelling).
+  ++fileTicket;
   $('#reset-heading').textContent = title; $('#reset-description').textContent = description;
   $('#confirm-reset').textContent = button; pendingAction = action; $('#reset-dialog').showModal();
 }

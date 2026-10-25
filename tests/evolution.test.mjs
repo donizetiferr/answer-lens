@@ -181,6 +181,37 @@ test('a file read completed after the view changes cannot replace the new compar
   assert.equal(app.get('#reset-dialog').open, false);
   assert.equal(app.get('#export-button'), null);
 });
+test('a delayed import cannot change a reset confirmation or its confirmed action', async () => {
+  const app = await appFixture();
+  await app.input('#question', 'Reset this draft only when I confirm.');
+  const json = exportResult(result());
+  let finish;
+  const reading = app.chooseFile({ name: 'slow.json', size: json.length, text: () => new Promise(resolve => { finish = resolve; }) });
+  await app.get('#reset-button').click();
+  const heading = app.get('#reset-heading').textContent;
+  finish(json); await reading;
+  assert.equal(app.get('#reset-dialog').open, true);
+  assert.equal(app.get('#reset-heading').textContent, heading);
+  assert.equal(app.get('#error').hidden, true);
+  await app.get('#confirm-reset').click(); await settleApp();
+  assert.equal(app.get('#question').value, '');
+  assert.equal(app.get('#export-button'), null, 'Confirming Reset must never open the delayed import.');
+  assert.equal(app.data.has(STORAGE_KEY), false);
+});
+test('a superseded file read cannot surface an error during or after a cancelled confirmation', async () => {
+  for (const cancelBeforeRead of [false, true]) {
+    const app = await appFixture();
+    await app.input('#question', 'Keep this draft when Reset is cancelled.');
+    let rejectRead;
+    const reading = app.chooseFile({ name: 'slow.json', size: 100, text: () => new Promise((_resolve, reject) => { rejectRead = reject; }) });
+    await app.get('#reset-button').click();
+    if (cancelBeforeRead) await app.get('#cancel-reset').click();
+    rejectRead(new Error('An obsolete read error.')); await reading;
+    assert.equal(app.get('#error').hidden, true);
+    assert.equal(app.get('#reset-dialog').open, !cancelBeforeRead);
+    assert.equal(app.get('#question').value, 'Keep this draft when Reset is cancelled.');
+  }
+});
 test('only the most recently selected file can open a result or report a read error', async () => {
   for (const lateFailure of [false, true]) {
     const app = await appFixture();
