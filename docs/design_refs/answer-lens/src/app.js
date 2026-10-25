@@ -110,6 +110,10 @@ async function clearOwnedData() {
         : await storageLock(() => clearLocal(() => localStorage, localRaw));
     }
     catch { result = { ok: false, message: 'The saved copy could not be deleted. It may remain on this device.' }; }
+    // A storage event can arrive after the lock callback but before its promise
+    // settles. Keep the newer conflict/protection notice and paused consent.
+    if (result.ok) localRaw = result.raw;
+    if (protectedData || externalChanged) return result;
     observeWrite(result);
     if (!result.ok && !result.conflict && !result.protected) dataState = 'delete-failed';
     // The user may opt back in while this deletion waits for the lock. Its

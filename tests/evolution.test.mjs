@@ -684,6 +684,41 @@ test('failed deletion preserves the saved bytes and its warning until a new expl
     assert.equal(JSON.parse(app.data.get(key)).question, 'My new draft remains independent of the undeleted copy.');
   }
 });
+test('a late deletion receipt cannot erase a newer other-tab conflict or protection notice', async () => {
+  for (const preview of [false, true]) for (const protectedRecord of [false, true]) for (const deletionFails of [false, true]) {
+    let finishDeletion;
+    const locks = { request(_name, action) {
+      const result = action();
+      // The mutation happens in the lock callback; its outer promise can settle
+      // after an event from a different tab has already reached this page.
+      return new Promise(resolve => { finishDeletion = () => resolve(result); });
+    } };
+    const initial = JSON.stringify(demoSession(true));
+    const app = await appFixture({ preview, initial, locks });
+    const key = preview ? 'answer-lens.preview.session.v2' : STORAGE_KEY;
+    if (deletionFails) app.localStorage.removeItem = () => { throw new Error('Synthetic deletion denial.'); };
+    await app.get('#reset-button').click(); await app.get('#confirm-reset').click(); await settleApp();
+    assert.equal(app.get('#data-status').dataset.state, 'clearing');
+    await app.input('#question', 'Keep this new draft and its current focus.');
+    const question = app.get('#question'); question.focus();
+    const other = protectedRecord ? '{"version":99,"question":"Synthetic future copy."}'
+      : JSON.stringify({ ...demoSession(true), question: 'A newer copy from another tab.' });
+    app.data.set(key, other);
+    await app.window.fire('storage', { key, storageArea: app.localStorage });
+    const state = protectedRecord ? 'protected' : 'conflict';
+    assert.equal(app.get('#data-status').dataset.state, state);
+    const notice = app.get('#data-status').textContent;
+    finishDeletion(); await settleApp();
+    assert.equal(app.get('#data-status').dataset.state, state, `preview=${preview}, protected=${protectedRecord}, failed=${deletionFails}`);
+    assert.equal(app.get('#data-status').textContent, notice);
+    assert.equal(app.get('#remember').checked, false);
+    assert.equal(app.get('#remember').disabled, protectedRecord);
+    assert.equal(app.data.get(key), other);
+    assert.equal(app.get('#question'), question);
+    assert.equal(app.document.activeElement, question);
+    assert.equal(question.value, 'Keep this new draft and its current focus.');
+  }
+});
 test('preview app handlers keep root records and ignore root-tab storage events', async () => {
   const app = await appFixture({ preview: true });
   const root = JSON.stringify({ ...result(), remember: true });
