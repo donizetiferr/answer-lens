@@ -164,6 +164,67 @@ test('next pair retains exactly the question, not consent, answers, source names
   assert.deepEqual(next, { ...emptySession(), question: s.question });
   assert.equal(s.phase, 'revealed'); assert.equal(s.remember, true);
 });
+test('cancelling the next pair preserves the revealed view, copy fallback and saved record', async () => {
+  for (const preview of [false, true]) {
+    const saved = { ...result(), remember: true };
+    saved.ratings.A.clarity = 4;
+    const raw = JSON.stringify(saved);
+    const app = await appFixture({ preview, initial: raw });
+    const key = preview ? 'answer-lens.preview.session.v2' : STORAGE_KEY;
+    await app.get('#copy-note').click(); // No clipboard API: exercise the existing fallback.
+    const fallback = app.get('#copy-text');
+    const heading = app.get('#decision-title');
+    const status = app.get('#status').textContent;
+    await app.get('#next-pair').click();
+    assert.equal(app.get('#reset-dialog').open, true);
+    await app.get('#cancel-reset').click();
+    assert.equal(app.get('#reset-dialog').open, false);
+    assert.equal(app.get('#decision-title'), heading);
+    assert.equal(app.get('#copy-text'), fallback);
+    assert.equal(fallback.value, decisionNote(saved));
+    assert.equal(fallback.selectionEnd, fallback.value.length);
+    assert.equal(app.get('#copy-fallback').hidden, false);
+    assert.equal(app.get('#remember').checked, true);
+    assert.equal(app.get('#data-status').dataset.state, 'saved');
+    assert.equal(app.get('#status').textContent, status);
+    assert.equal(app.data.get(key), raw);
+  }
+});
+test('a confirmed next pair retains only the question while its saved result waits for deletion', async () => {
+  for (const preview of [false, true]) {
+    const locks = controlledLocks();
+    const saved = { ...result(), remember: true };
+    saved.ratings.B.factualConfidence = 'unsure';
+    const raw = JSON.stringify(saved);
+    const app = await appFixture({ preview, initial: raw, locks });
+    const key = preview ? 'answer-lens.preview.session.v2' : STORAGE_KEY;
+    try {
+      await app.get('#next-pair').click(); await app.get('#confirm-reset').click(); await settleApp();
+      assert.equal(app.get('#question').value, saved.question);
+      for (const selector of ['#answer-0', '#answer-1', '#origin-0', '#origin-1']) assert.equal(app.get(selector).value, '');
+      assert.equal(app.get('#remember').checked, false);
+      assert.equal(app.get('.demo-notice'), null);
+      assert.equal(app.get('#copy-fallback'), null);
+      assert.equal(app.get('#data-status').dataset.state, 'clearing');
+      assert.equal(app.data.get(key), raw, 'Do not claim deletion before acquiring the lock.');
+      assert.equal(locks.pending.length, 1);
+      let warned = false;
+      await app.window.fire('beforeunload', { preventDefault() { warned = true; } });
+      assert.equal(warned, true, 'The retained question is unsaved work even before the user types.');
+      const question = app.get('#question'); question.focus();
+      await app.input('#question', 'A fresh question edited during the cleanup.');
+      await locks.release();
+      assert.equal(app.get('#question'), question);
+      assert.equal(app.document.activeElement, question);
+      assert.equal(app.get('#data-status').dataset.state, 'tab');
+      assert.equal(app.data.has(key), false);
+      app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp();
+      await locks.release();
+      assert.equal(app.get('#data-status').dataset.state, 'saved');
+      assert.deepEqual(JSON.parse(app.data.get(key)), { ...emptySession(), remember: true, question: question.value });
+    } finally { await locks.drain(); }
+  }
+});
 test('cancelling a valid import lets the same file be selected again without losing the draft', async () => {
   const app = await appFixture();
   await app.input('#question', 'Keep this draft unless I confirm.');
