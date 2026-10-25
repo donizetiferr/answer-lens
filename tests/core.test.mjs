@@ -159,6 +159,23 @@ test('self-contained JSON roundtrip preserves full answers, ratings, mapping and
   assert.equal(exportResult(restored), json);
   assert.equal(parsed.assessment, 'human-self-report'); assert.equal('accuracyScore' in parsed, false);
 });
+test('maximum supported texts remain portable with JSON escaping and multibyte Unicode', () => {
+  for (const pattern of ['\u0000\u001f\n\t"\\', 'ação 漢字 🧪 \ud800']) {
+    const fill = length => pattern.repeat(Math.ceil(length / pattern.length)).slice(0, length);
+    const draft = emptySession();
+    draft.question = fill(LIMITS.question);
+    draft.inputs = [0, 1].map(() => ({ origin: fill(LIMITS.origin), text: fill(LIMITS.answer) }));
+    // Use both assignments and every verdict; export must not truncate either
+    // answer, the question, origins or the reason to meet the import ceiling.
+    for (const seed of [0, 1]) for (const verdict of ['A', 'B', 'tie', 'neither']) {
+      const locked = lockAndReveal(beginBlind(draft, { seed, now: time }), verdict, fill(LIMITS.note), later);
+      const json = exportResult(locked);
+      assert.ok(Buffer.byteLength(json, 'utf8') <= LIMITS.json);
+      assert.deepEqual(importResult(json), locked);
+      assert.equal(exportResult(importResult(json)), json);
+    }
+  }
+});
 test('tampered shuffle, invalid supplied ratings, wrong schema and malformed JSON are rejected', () => {
   const parsed = JSON.parse(exportResult(result()));
   parsed.comparison.randomization.order.reverse(); assert.throws(() => importResult(JSON.stringify(parsed)), /seed/);
