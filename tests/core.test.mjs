@@ -53,6 +53,19 @@ test('input lengths and types are validated', () => {
   const session = demoSession(); session.inputs[1].text = 42;
   assert.throws(() => beginBlind(session, { seed: 0, now: time }), /text/);
 });
+test('holes cannot stand in for required answers or recorded shuffle positions', () => {
+  for (const index of [0, 1]) {
+    const draft = demoSession(); delete draft.inputs[index];
+    assert.throws(() => beginBlind(draft, { seed: 0, now: time }), /answer/i);
+    for (const phase of [emptySession(), blind(), result()]) {
+      delete phase.inputs[index];
+      assert.throws(() => validateSession(phase), /answer/i);
+      if (phase.phase === 'revealed') assert.throws(() => exportResult(phase), /answer/i);
+    }
+    const session = blind(); delete session.randomization.order[index];
+    assert.throws(() => validateSession(session), /order/);
+  }
+});
 test('empty source names are allowed and only get a fallback after reveal', () => {
   let session = rated(); session.inputs.forEach(input => { input.origin = ''; });
   assert.ok(!('origin' in comparisonView(session).answers[0]));

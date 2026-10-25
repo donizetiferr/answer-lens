@@ -41,11 +41,11 @@ export function validateInputs(session) {
   requireThat(isObject(session), 'A comparison is required.');
   text(session.question, LIMITS.question, 'Your question', true);
   requireThat(Array.isArray(session.inputs) && session.inputs.length === 2, 'Two answers are required.');
-  session.inputs.forEach((input, index) => {
+  for (const [index, input] of session.inputs.entries()) {
     requireThat(isObject(input), 'Each answer must include text.');
     text(input.text, LIMITS.answer, `Answer ${index + 1}`, true);
     text(input.origin, LIMITS.origin, `Source ${index + 1}`);
-  });
+  }
   return true;
 }
 export function orderingFromSeed(seed) {
@@ -104,7 +104,7 @@ export function validateSession(raw) {
   requireThat(Array.isArray(raw.inputs) && raw.inputs.length === 2, 'Invalid answer pair.');
   const next = emptySession();
   Object.assign(next, { phase: raw.phase, remember: raw.remember, synthetic: raw.synthetic, question: raw.question });
-  next.inputs = raw.inputs.map(input => {
+  next.inputs = Array.from(raw.inputs, input => {
     requireThat(isObject(input), 'Invalid answer.');
     return { origin: text(input.origin, LIMITS.origin, 'Source'), text: text(input.text, LIMITS.answer, 'Answer') };
   });
@@ -124,7 +124,7 @@ export function validateSession(raw) {
     const r = raw.randomization;
     requireThat(isObject(r) && r.algorithm === ALGORITHM && iso(r.assignedAt), 'Invalid randomization record.');
     const expected = orderingFromSeed(r.seed);
-    requireThat(Array.isArray(r.order) && r.order.length === 2 && r.order.every((value, i) => value === expected[i]), 'The recorded order does not match the seed.');
+    requireThat(Array.isArray(r.order) && r.order.length === 2 && expected.every((value, i) => value === r.order[i]), 'The recorded order does not match the seed.');
     next.randomization = { algorithm: ALGORITHM, seed: r.seed, order: expected, assignedAt: r.assignedAt };
     if (raw.phase === 'revealed') {
       requireThat(next.verdict !== null && iso(raw.lockedAt) && Date.parse(raw.lockedAt) >= Date.parse(r.assignedAt), 'The result needs a locked verdict and valid lock time.');
