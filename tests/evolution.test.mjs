@@ -246,6 +246,53 @@ test('explicit v1 local migration reads but does not write or clear either key',
   assert.equal(migrated.ok, true); assert.equal(migrated.session.remember, false);
   assert.equal(storage.getItem(LEGACY_KEY), bytes); assert.equal(storage.getItem(STORAGE_KEY), null); assert.deepEqual(storage.writes, []);
 });
+test('the app resumes real v1 drafts and blind decisions without adopting their old saving consent', async () => {
+  for (const phase of ['setup', 'blind']) {
+    let old = { ...demoSession(true), version: 1 };
+    if (phase === 'blind') {
+      old = v1.beginBlind(old, { seed: 1, now: start });
+      old = v1.setRating(old, 'B', 'clarity', 3);
+      old.verdict = 'B'; old.note = 'A decision started in the old application.';
+    }
+    const legacy = JSON.stringify(old);
+    const app = await appFixture({ legacy });
+    assert.equal(app.get('#question').value, '', 'Legacy content requires the explicit open action.');
+    await app.get('#legacy-button').click(); await settleApp();
+    assert.equal(app.get('#remember').checked, false);
+    assert.equal(app.data.has(STORAGE_KEY), false);
+    assert.equal(app.data.get(LEGACY_KEY), legacy);
+    if (phase === 'setup') {
+      assert.equal(app.get('#question').value, old.question);
+      assert.equal(app.get('#answer-0').value, old.inputs[0].text);
+      assert.equal(app.get('#origin-1').value, old.inputs[1].origin);
+      await app.get('#setup-form').fire('submit');
+      await app.get('input[name="verdict"]').fire('change');
+    } else {
+      const verdicts = app.document.querySelectorAll('input[name="verdict"]');
+      assert.equal(verdicts.find(node => node.value === 'B').checked, true);
+      assert.equal(app.get('#note').value, old.note);
+      assert.equal(app.document.querySelectorAll('input[name="B-clarity"]').find(node => node.value === '3').checked, true);
+    }
+    assert.equal(app.get('#origin-0'), null);
+    assert.equal(app.get('#export-button'), null);
+    await app.get('#verdict-form').fire('submit'); await settleApp();
+    assert.ok(app.get('#export-button'));
+    assert.equal(app.data.has(STORAGE_KEY), false);
+    app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp();
+    const saved = loadLocal(() => app.localStorage).session;
+    assert.equal(saved.version, 2); assert.equal(saved.phase, 'revealed');
+    assert.deepEqual(saved.inputs, old.inputs);
+    assert.equal(saved.verdict, phase === 'blind' ? 'B' : 'A');
+    if (phase === 'blind') {
+      assert.deepEqual(saved.randomization, old.randomization);
+      assert.deepEqual(saved.ratings, old.ratings);
+      assert.equal(saved.note, old.note);
+    }
+    await app.get('#reset-button').click(); await app.get('#confirm-reset').click(); await settleApp();
+    assert.equal(app.data.has(STORAGE_KEY), false);
+    assert.equal(app.data.get(LEGACY_KEY), legacy);
+  }
+});
 test('actual old v1 loader, saver and reset cannot touch new v2 partial data', () => {
   const storage = new MemoryStorage(); const s = result(); s.remember = true;
   saveLocal(s, () => storage, null); const v2Bytes = storage.getItem(STORAGE_KEY);
