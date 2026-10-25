@@ -106,7 +106,9 @@ async function clearOwnedData() {
     catch { result = { ok: false, message: 'The saved copy could not be deleted. It may remain on this device.' }; }
     observeWrite(result);
     if (!result.ok && !result.conflict && !result.protected) dataState = 'delete-failed';
-    if (result.ok) dataState = 'tab';
+    // The user may opt back in while this deletion waits for the lock. Its
+    // queued replacement write still needs an honest pending-save status.
+    if (result.ok) dataState = session.remember ? 'saving' : 'tab';
     return result;
   });
   saveQueue = clearing.then(() => {}, () => {});

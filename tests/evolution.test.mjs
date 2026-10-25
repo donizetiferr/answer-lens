@@ -180,6 +180,32 @@ test('quota and blocked reads cannot falsely report saved', () => {
   assert.equal(saveLocal({ ...result(), remember: true }, () => storage, null).ok, false);
   assert.equal(loadLocal(() => { throw new Error('Denied'); }).ok, false);
 });
+test('re-enabling saving during deletion stays visibly pending until the new write finishes', async () => {
+  const pending = [];
+  const locks = { request(_name, action) { return new Promise(resolve => pending.push({ action, resolve })); } };
+  const settle = () => new Promise(setImmediate);
+  const release = async () => { const lock = pending.shift(); lock.resolve(await lock.action()); await settle(); };
+  const app = await appFixture({ locks });
+  const enable = async () => { app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settle(); };
+  try {
+    await app.input('#question', 'Draft retained through a quick saving toggle.');
+    await enable(); await release();
+    assert.equal(app.get('#data-status').dataset.state, 'saved');
+    app.get('#remember').checked = false;
+    const clearing = app.get('#remember').fire('change'); await settle();
+    assert.equal(app.get('#data-status').dataset.state, 'clearing');
+    await enable();
+    await release(); await clearing;
+    assert.equal(app.data.get(STORAGE_KEY), undefined);
+    assert.equal(pending.length, 1, 'The replacement save is still waiting for its lock.');
+    assert.equal(app.get('#remember').checked, true);
+    assert.equal(app.get('#data-status').dataset.state, 'saving');
+    assert.match(app.get('#save-feedback').textContent, /Saving/);
+    await release();
+    assert.equal(app.get('#data-status').dataset.state, 'saved');
+    assert.equal(JSON.parse(app.data.get(STORAGE_KEY)).question, 'Draft retained through a quick saving toggle.');
+  } finally { while (pending.length) await release(); }
+});
 test('new modules remain local and rendering never interprets supplied HTML', async () => {
   for (const file of ['app', 'output', 'storage']) {
     const code = await readFile(new URL(`../src/${file}.js`, import.meta.url), 'utf8');
