@@ -266,6 +266,28 @@ test('the app protects unsupported initial records and opens legacy data only on
   assert.equal(older.data.get(LEGACY_KEY), legacy);
   assert.equal(older.data.has(STORAGE_KEY), false);
 });
+test('reset and import without a saved copy do not require browser lock support', async () => {
+  const app = await appFixture({ locks: null });
+  await app.input('#question', 'A tab-only draft.');
+  await app.get('#reset-button').click(); await app.get('#confirm-reset').click(); await settleApp();
+  assert.equal(app.get('#question').value, '');
+  assert.equal(app.get('#data-status').dataset.state, 'tab');
+  const json = exportResult(result());
+  await app.chooseFile({ name: 'result.json', size: json.length, text: async () => json }); await settleApp();
+  assert.ok(app.get('#export-button'));
+  assert.equal(app.get('#remember').checked, false);
+  assert.equal(app.get('#data-status').dataset.state, 'tab');
+  assert.equal(app.data.has(STORAGE_KEY), false);
+});
+test('missing lock support still protects an existing saved comparison during reset', async () => {
+  const raw = JSON.stringify(demoSession(true));
+  const app = await appFixture({ initial: raw, locks: null });
+  await app.get('#reset-button').click(); await app.get('#confirm-reset').click(); await settleApp();
+  assert.equal(app.get('#question').value, '');
+  assert.equal(app.get('#remember').checked, false);
+  assert.equal(app.get('#data-status').dataset.state, 'delete-failed');
+  assert.equal(app.data.get(STORAGE_KEY), raw);
+});
 test('an external save cancels this queued write and reset leaves the other tab record untouched', async () => {
   const locks = controlledLocks(); const app = await appFixture({ locks });
   try {

@@ -88,7 +88,13 @@ async function clearOwnedData() {
   const clearing = saveQueue.then(async () => {
     if (protectedData || externalChanged) return { ok: false, kept: true };
     let result;
-    try { result = await storageLock(() => clearLocal(() => localStorage, localRaw)); }
+    try {
+      // A tab-only session may have nothing to delete, including in browsers
+      // without Web Locks. Reading an absent key needs no lock or mutation.
+      const current = localRaw === null ? loadLocal() : null;
+      result = current?.ok && current.raw === null ? { ok: true, raw: null }
+        : await storageLock(() => clearLocal(() => localStorage, localRaw));
+    }
     catch { result = { ok: false, message: 'The saved copy could not be deleted. It may remain on this device.' }; }
     observeWrite(result);
     if (!result.ok && !result.conflict && !result.protected) dataState = 'delete-failed';
