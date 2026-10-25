@@ -234,6 +234,38 @@ test('reset cancels a queued save and preserves the new unsaved draft typed duri
     assert.equal(app.get('#data-status').dataset.state, 'tab');
   } finally { await locks.drain(); }
 });
+test('the app restores its actual saved draft from the injected device storage', async () => {
+  const saved = { ...demoSession(true), question: 'A saved draft from this device.' };
+  const raw = JSON.stringify(saved);
+  const app = await appFixture({ initial: raw });
+  assert.equal(app.get('#question').value, saved.question);
+  assert.equal(app.get('#remember').checked, true);
+  assert.equal(app.get('#data-status').dataset.state, 'saved');
+  assert.equal(app.data.get(STORAGE_KEY), raw);
+  // A redundant event must be compared with the same injected snapshot.
+  await app.window.fire('storage', { key: STORAGE_KEY, storageArea: app.localStorage });
+  assert.equal(app.get('#data-status').dataset.state, 'saved');
+  await app.input('#question', 'An edit to the restored draft.'); await settleApp();
+  assert.equal(app.get('#data-status').dataset.state, 'saved');
+  assert.equal(JSON.parse(app.data.get(STORAGE_KEY)).question, 'An edit to the restored draft.');
+});
+test('the app protects unsupported initial records and opens legacy data only on request', async () => {
+  const raw = '{"version":99,"question":"Preserve this future record."}';
+  const app = await appFixture({ initial: raw });
+  assert.equal(app.get('#data-status').dataset.state, 'protected');
+  assert.equal(app.get('#remember').disabled, true);
+  assert.equal(app.get('#question').value, '');
+  assert.equal(app.data.get(STORAGE_KEY), raw);
+  const legacy = JSON.stringify({ ...legacyResult(), remember: true });
+  const older = await appFixture({ legacy });
+  assert.equal(older.get('#question').value, '');
+  assert.equal(older.get('#data-status').dataset.state, 'tab');
+  await older.get('#legacy-button').click(); await settleApp();
+  assert.ok(older.get('#export-button'));
+  assert.equal(older.get('#remember').checked, false);
+  assert.equal(older.data.get(LEGACY_KEY), legacy);
+  assert.equal(older.data.has(STORAGE_KEY), false);
+});
 test('an external save cancels this queued write and reset leaves the other tab record untouched', async () => {
   const locks = controlledLocks(); const app = await appFixture({ locks });
   try {
