@@ -344,6 +344,7 @@ function downloadResult() {
   try {
     const json = exportResult(session);
     if (globalThis.origin === 'null') {
+      ++copyTicket;
       $('#copy-fallback').hidden = false; $('#copy-label').textContent = 'Full result JSON — select and copy';
       $('#copy-text').value = json; $('#copy-text').focus(); $('#copy-text').select();
       say('This isolated viewer cannot download files. The full result JSON is selected below for you to copy.');

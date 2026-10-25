@@ -135,6 +135,29 @@ test('copy completion after reset never opens fallback or rewrites the new view 
     assert.equal(app.get('#error').hidden, true);
   }
 });
+test('opaque preview export keeps the full JSON selected when an older copy finishes', async () => {
+  for (const lateFailure of [false, true]) {
+    let finish;
+    const clipboard = { writeText: () => new Promise((resolve, reject) => {
+      finish = () => lateFailure ? reject(new Error('A delayed copy denial.')) : resolve();
+    }) };
+    const app = await appFixture({ preview: true, opaque: true, clipboard });
+    const json = exportResult(result());
+    await app.chooseFile({ name: 'result.json', size: json.length, text: async () => json }); await settleApp();
+    const copying = app.get('#copy-note').click();
+    await app.get('#export-button').click();
+    const message = app.get('#status').textContent;
+    assert.match(message, /full result JSON is selected/);
+    assert.equal(app.get('#copy-text').value, json);
+    finish(); await copying;
+    assert.equal(app.get('#copy-fallback').hidden, false);
+    assert.equal(app.get('#copy-label').textContent, 'Full result JSON — select and copy');
+    assert.equal(app.get('#copy-text').value, json);
+    assert.equal(app.get('#copy-text').selectionEnd, json.length);
+    assert.equal(app.get('#status').textContent, message);
+    assert.equal(app.data.size, 0);
+  }
+});
 test('next pair retains exactly the question, not consent, answers, source names or demo status', () => {
   const s = result(); s.remember = true;
   const next = nextPair(s);

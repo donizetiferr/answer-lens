@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 import * as core from '../../src/core.js';
 import * as storage from '../../src/storage.js';
+import * as previewStorage from '../../docs/design_refs/answer-lens/src/storage.js';
 import * as output from '../../src/output.js';
 import { demoSession } from '../../src/demo.js';
 
@@ -64,7 +65,8 @@ export function controlledLocks() {
     async drain() { while (pending.length) await this.release(); }
   };
 }
-export async function appFixture({ initial = null, legacy = null, clipboard = null, locks = { request: async (_name, action) => action() } } = {}) {
+export async function appFixture({ initial = null, legacy = null, clipboard = null, locks = { request: async (_name, action) => action() }, preview = false, opaque = false } = {}) {
+  const deviceStorage = preview ? previewStorage : storage;
   const document = {
     createElement(tag) { const node = new Element(tag); node.document = document; return node; },
     createTextNode: text => new Text(text),
@@ -80,17 +82,18 @@ export async function appFixture({ initial = null, legacy = null, clipboard = nu
   for (const id of ['app', 'status', 'error', 'data-status', 'save-retry', 'reset-button', 'reset-dialog', 'reset-heading', 'reset-description', 'confirm-reset', 'cancel-reset', 'offline-status']) {
     const node = document.createElement('div'); node.id = id; document.body.append(node);
   }
-  const data = new Map(initial === null ? [] : [[storage.STORAGE_KEY, initial]]);
-  if (legacy !== null) data.set(storage.LEGACY_KEY, legacy);
+  const data = new Map(initial === null ? [] : [[deviceStorage.STORAGE_KEY, initial]]);
+  if (legacy !== null) data.set(deviceStorage.LEGACY_KEY, legacy);
   const localStorage = { getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value), removeItem: key => data.delete(key) };
   const window = new Element(); window.scrollTo = () => {};
-  const source = await readFile(new URL('../../src/app.js', import.meta.url), 'utf8');
+  const source = await readFile(new URL(preview ? '../../docs/design_refs/answer-lens/src/app.js' : '../../src/app.js', import.meta.url), 'utf8');
   runInNewContext(source.replace(/^import .+;\n/gm, ''), {
-    ...core, ...storage, ...output, demoSession, document, localStorage, window, navigator: { locks, clipboard },
+    ...core, ...deviceStorage, ...output, demoSession, document, localStorage, window, navigator: { locks, clipboard },
+    origin: opaque ? 'null' : 'https://answer-lens.example',
     // Module functions retain their own realm's default arguments. Bind reads
     // explicitly so they never use Node's global localStorage outside this VM.
-    loadLocal: () => storage.loadLocal(() => localStorage),
-    loadLegacy: () => storage.loadLegacy(() => localStorage),
+    loadLocal: () => deviceStorage.loadLocal(() => localStorage),
+    loadLegacy: () => deviceStorage.loadLegacy(() => localStorage),
     Node: Element, structuredClone, crypto: globalThis.crypto, URL, Blob, setTimeout, clearTimeout
   });
   return {
