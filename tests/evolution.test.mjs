@@ -610,6 +610,97 @@ test('a rejected save stays unsaved and retry saves the current draft before rem
   await app.window.fire('beforeunload', { preventDefault() { warned = true; } });
   assert.equal(warned, false);
 });
+test('clearing optional ratings keeps the selected verdict and reason in both app handlers', async () => {
+  for (const preview of [false, true]) {
+    const app = await appFixture({ preview, initial: JSON.stringify({ ...blind(), remember: true }) });
+    const key = preview ? 'answer-lens.preview.session.v2' : STORAGE_KEY;
+    await app.get('#verdict-form').fire('submit');
+    assert.equal(app.get('#verdict-error').hidden, false);
+    assert.equal(app.document.activeElement, app.get('input[name="verdict"]'));
+    const verdict = app.document.querySelectorAll('input[name="verdict"]').find(node => node.value === 'B');
+    verdict.checked = true; await verdict.fire('change');
+    assert.equal(app.get('#verdict-error').hidden, true);
+    await app.input('#note', 'The reason remains even when optional scores are removed.');
+    for (const [group, value] of [['A-clarity', '4'], ['B-factualConfidence', 'unsure']]) {
+      const rating = app.document.querySelectorAll(`input[name="${group}"]`).find(node => node.value === value);
+      rating.checked = true; await rating.fire('change');
+    }
+    await settleApp();
+    assert.deepEqual(JSON.parse(app.data.get(key)).ratings, { A: { clarity: 4 }, B: { factualConfidence: 'unsure' } });
+    await app.get('#clear-ratings').click(); await settleApp();
+    assert.ok(app.document.querySelectorAll('#details-ratings input[type=radio]').every(node => !node.checked));
+    assert.equal(verdict.checked, true);
+    assert.equal(app.get('#note').value, 'The reason remains even when optional scores are removed.');
+    await app.get('#verdict-form').fire('submit'); await settleApp();
+    const saved = JSON.parse(app.data.get(key));
+    assert.equal(saved.phase, 'revealed'); assert.equal(saved.verdict, 'B');
+    assert.equal(saved.note, 'The reason remains even when optional scores are removed.');
+    assert.deepEqual(saved.ratings, { A: {}, B: {} });
+    assert.equal(app.get('#data-status').dataset.state, 'saved');
+  }
+});
+test('quota failure remains visible through blind and reveal, and retry saves the complete result', async () => {
+  for (const preview of [false, true]) {
+    const initial = JSON.stringify(demoSession(true));
+    const app = await appFixture({ preview, initial });
+    const key = preview ? 'answer-lens.preview.session.v2' : STORAGE_KEY;
+    const setItem = app.localStorage.setItem;
+    app.localStorage.setItem = () => { throw new Error('Synthetic quota exhaustion.'); };
+    await app.get('#setup-form').fire('submit'); await settleApp();
+    assert.equal(app.get('#data-status').dataset.state, 'failed');
+    assert.equal(app.get('#save-retry').hidden, false);
+    await app.get('input[name="verdict"]').fire('change');
+    await app.input('#note', 'The failed saved copy must not erase this locked reason.');
+    await app.get('#verdict-form').fire('submit'); await settleApp();
+    assert.ok(app.get('#export-button'));
+    assert.equal(app.get('#data-status').dataset.state, 'failed');
+    assert.match(app.get('#save-feedback').textContent, /Not saved/);
+    assert.equal(app.data.get(key), initial);
+    app.localStorage.setItem = setItem;
+    await app.get('#save-retry').click(); await settleApp();
+    assert.equal(app.get('#data-status').dataset.state, 'saved');
+    const saved = JSON.parse(app.data.get(key));
+    assert.equal(saved.phase, 'revealed'); assert.equal(saved.verdict, 'A');
+    assert.equal(saved.note, 'The failed saved copy must not erase this locked reason.');
+    assert.equal(saved.remember, true);
+  }
+});
+test('failed deletion preserves the saved bytes and its warning until a new explicit saving choice', async () => {
+  for (const preview of [false, true]) {
+    const initial = JSON.stringify(demoSession(true));
+    const app = await appFixture({ preview, initial });
+    const key = preview ? 'answer-lens.preview.session.v2' : STORAGE_KEY;
+    app.localStorage.removeItem = () => { throw new Error('Synthetic deletion denial.'); };
+    await app.get('#reset-button').click(); await app.get('#confirm-reset').click(); await settleApp();
+    assert.equal(app.get('#question').value, '');
+    assert.equal(app.get('#remember').checked, false);
+    assert.equal(app.get('#data-status').dataset.state, 'delete-failed');
+    assert.equal(app.data.get(key), initial);
+    await app.input('#question', 'My new draft remains independent of the undeleted copy.');
+    assert.equal(app.get('#data-status').dataset.state, 'delete-failed');
+    assert.equal(app.data.get(key), initial);
+    app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp();
+    assert.equal(app.get('#data-status').dataset.state, 'saved');
+    assert.equal(JSON.parse(app.data.get(key)).question, 'My new draft remains independent of the undeleted copy.');
+  }
+});
+test('preview app handlers keep root records and ignore root-tab storage events', async () => {
+  const app = await appFixture({ preview: true });
+  const root = JSON.stringify({ ...result(), remember: true });
+  app.data.set(STORAGE_KEY, root);
+  app.data.set(LEGACY_KEY, 'Preserve the root legacy key.');
+  await app.input('#question', 'Preview draft only.'); app.get('#question').focus();
+  app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp();
+  assert.equal(app.get('#data-status').dataset.state, 'saved');
+  await app.window.fire('storage', { key: STORAGE_KEY, storageArea: app.localStorage });
+  assert.equal(app.get('#data-status').dataset.state, 'saved');
+  assert.equal(app.get('#remember').checked, true);
+  assert.equal(app.document.activeElement, app.get('#question'));
+  await app.get('#reset-button').click(); await app.get('#confirm-reset').click(); await settleApp();
+  assert.deepEqual([...app.data], [[STORAGE_KEY, root], [LEGACY_KEY, 'Preserve the root legacy key.']]);
+  assert.equal(app.get('#question').value, '');
+  assert.equal(app.get('#data-status').dataset.state, 'tab');
+});
 test('new modules remain local and rendering never interprets supplied HTML', async () => {
   for (const file of ['app', 'output', 'storage']) {
     const code = await readFile(new URL(`../src/${file}.js`, import.meta.url), 'utf8');

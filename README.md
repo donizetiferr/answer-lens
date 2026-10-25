@@ -112,6 +112,8 @@ The isolated tests execute real app handlers with a minimal DOM substitute and c
 
 Storage reads in the app fixture are explicitly bound to its injected device storage, including initial restoration, legacy opening and conflict rechecks. Clipboard promises are controlled to check stale feedback and selected-text fallback. Worker lifecycle tests check precache-before-takeover ordering and cache cleanup by scope; they do not emulate native `Cache.addAll` atomicity, OS clipboard ordering or actual page control.
 
+The same fixture also executes the generated preview handlers with their own storage keys. Local cases cover delayed imports during a confirmation, quota and deletion failures, clearing optional ratings without clearing the verdict/reason, root/preview data isolation, and older clipboard completions after a restricted-viewer JSON export. The opaque-origin case checks application control flow; it does not emulate browser sandbox enforcement or native form behavior.
+
 Actual UI/server checks are separate. Playwright is pinned as a development-only dependency, and no browser binary is bundled:
 
 ```sh
