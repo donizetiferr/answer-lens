@@ -7,7 +7,7 @@ import { decisionNote, preferredAnswer, ratingText } from '../src/output.js';
 import { STORAGE_KEY, LEGACY_KEY, saveLocal, clearLocal, loadLocal, loadLegacy } from '../src/storage.js';
 import * as v1 from './fixtures/v1/core.js';
 import * as v1Storage from './fixtures/v1/storage.js';
-import { appFixture } from './fixtures/app.mjs';
+import { appFixture, controlledLocks, settleApp } from './fixtures/app.mjs';
 const start = '2026-09-21T07:00:00.000Z', end = '2026-09-21T07:01:00.000Z';
 const blind = () => beginBlind(demoSession(), { seed: 1, now: start });
 const result = () => lockAndReveal(blind(), 'B', 'The steps help with this question.', end);
@@ -181,30 +181,98 @@ test('quota and blocked reads cannot falsely report saved', () => {
   assert.equal(loadLocal(() => { throw new Error('Denied'); }).ok, false);
 });
 test('re-enabling saving during deletion stays visibly pending until the new write finishes', async () => {
-  const pending = [];
-  const locks = { request(_name, action) { return new Promise(resolve => pending.push({ action, resolve })); } };
-  const settle = () => new Promise(setImmediate);
-  const release = async () => { const lock = pending.shift(); lock.resolve(await lock.action()); await settle(); };
+  const locks = controlledLocks();
   const app = await appFixture({ locks });
-  const enable = async () => { app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settle(); };
+  const enable = async () => { app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp(); };
   try {
     await app.input('#question', 'Draft retained through a quick saving toggle.');
-    await enable(); await release();
+    await enable(); await locks.release();
     assert.equal(app.get('#data-status').dataset.state, 'saved');
     app.get('#remember').checked = false;
-    const clearing = app.get('#remember').fire('change'); await settle();
+    const clearing = app.get('#remember').fire('change'); await settleApp();
     assert.equal(app.get('#data-status').dataset.state, 'clearing');
     await enable();
-    await release(); await clearing;
+    await locks.release(); await clearing;
     assert.equal(app.data.get(STORAGE_KEY), undefined);
-    assert.equal(pending.length, 1, 'The replacement save is still waiting for its lock.');
+    assert.equal(locks.pending.length, 1, 'The replacement save is still waiting for its lock.');
     assert.equal(app.get('#remember').checked, true);
     assert.equal(app.get('#data-status').dataset.state, 'saving');
     assert.match(app.get('#save-feedback').textContent, /Saving/);
-    await release();
+    await locks.release();
     assert.equal(app.get('#data-status').dataset.state, 'saved');
     assert.equal(JSON.parse(app.data.get(STORAGE_KEY)).question, 'Draft retained through a quick saving toggle.');
-  } finally { while (pending.length) await release(); }
+  } finally { await locks.drain(); }
+});
+test('queued keystrokes never save obsolete snapshots and the latest edit gets its own save receipt', async () => {
+  const locks = controlledLocks(); const app = await appFixture({ locks });
+  try {
+    await app.input('#question', 'Original draft');
+    app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp();
+    await app.input('#question', 'Superseded edit');
+    await app.input('#question', 'Latest edit');
+    assert.equal(app.get('#data-status').dataset.state, 'saving');
+    await locks.release();
+    assert.equal(app.data.size, 0, 'The obsolete snapshot must not be written after waiting for its lock.');
+    assert.equal(locks.pending.length, 1);
+    assert.equal(app.get('#data-status').dataset.state, 'saving');
+    await locks.release();
+    assert.equal(app.get('#data-status').dataset.state, 'saved');
+    assert.equal(JSON.parse(app.data.get(STORAGE_KEY)).question, 'Latest edit');
+  } finally { await locks.drain(); }
+});
+test('reset cancels a queued save and preserves the new unsaved draft typed during cleanup', async () => {
+  const locks = controlledLocks(); const app = await appFixture({ locks });
+  try {
+    await app.input('#question', 'Old answers must not return.');
+    app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp();
+    await app.get('#reset-button').click(); await app.get('#confirm-reset').click();
+    await app.input('#question', 'Fresh draft typed while waiting.');
+    await locks.drain();
+    assert.equal(app.data.size, 0);
+    assert.equal(app.get('#question').value, 'Fresh draft typed while waiting.');
+    assert.equal(app.get('#remember').checked, false);
+    assert.equal(app.get('#data-status').dataset.state, 'tab');
+  } finally { await locks.drain(); }
+});
+test('an external save cancels this queued write and reset leaves the other tab record untouched', async () => {
+  const locks = controlledLocks(); const app = await appFixture({ locks });
+  try {
+    await app.input('#question', 'My independent draft.');
+    app.get('#question').focus();
+    app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp();
+    const other = JSON.stringify({ ...demoSession(true), question: 'Other tab owns this saved record.' });
+    app.data.set(STORAGE_KEY, other);
+    await app.window.fire('storage', { key: STORAGE_KEY, storageArea: app.localStorage });
+    assert.equal(app.get('#data-status').dataset.state, 'conflict');
+    assert.equal(app.get('#remember').checked, false);
+    assert.equal(app.document.activeElement, app.get('#question'));
+    assert.equal(app.get('#question').value, 'My independent draft.');
+    await locks.release();
+    assert.equal(app.data.get(STORAGE_KEY), other);
+    await app.get('#reset-button').click(); await app.get('#confirm-reset').click(); await settleApp();
+    assert.equal(app.data.get(STORAGE_KEY), other);
+    assert.equal(app.get('#question').value, '');
+    assert.equal(locks.pending.length, 0, 'Reset must not request a deletion for another tab record.');
+  } finally { await locks.drain(); }
+});
+test('a rejected save stays unsaved and retry saves the current draft before removing the leave warning', async () => {
+  const locks = { async request() { throw new Error('Lock service temporarily failed.'); } };
+  const app = await appFixture({ locks });
+  await app.input('#question', 'Keep this draft through the failure.');
+  app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp();
+  assert.equal(app.get('#data-status').dataset.state, 'failed');
+  assert.equal(app.get('#save-retry').hidden, false);
+  assert.equal(app.data.size, 0);
+  let warned = false;
+  await app.window.fire('beforeunload', { preventDefault() { warned = true; } });
+  assert.equal(warned, true);
+  locks.request = async (_name, action) => action();
+  await app.get('#save-retry').click(); await settleApp();
+  assert.equal(app.get('#data-status').dataset.state, 'saved');
+  assert.equal(JSON.parse(app.data.get(STORAGE_KEY)).question, 'Keep this draft through the failure.');
+  warned = false;
+  await app.window.fire('beforeunload', { preventDefault() { warned = true; } });
+  assert.equal(warned, false);
 });
 test('new modules remain local and rendering never interprets supplied HTML', async () => {
   for (const file of ['app', 'output', 'storage']) {

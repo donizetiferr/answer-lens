@@ -51,6 +51,19 @@ function matches(node, selector) {
   const [, tag, key, value] = /^(\w+)(?:\[(\w+)=["']?([^"'\]]+)["']?\])?$/.exec(selector) || [];
   return node.tagName.toLowerCase() === tag && (!key || String(node.getAttribute(key)) === value);
 }
+export const settleApp = () => new Promise(setImmediate);
+export function controlledLocks() {
+  const pending = [];
+  return {
+    pending,
+    request(_name, action) { return new Promise(resolve => pending.push({ action, resolve })); },
+    async release() {
+      const lock = pending.shift(); if (!lock) throw new Error('No pending lock to release.');
+      lock.resolve(await lock.action()); await settleApp();
+    },
+    async drain() { while (pending.length) await this.release(); }
+  };
+}
 export async function appFixture({ initial = null, locks = { request: async (_name, action) => action() } } = {}) {
   const document = {
     createElement(tag) { const node = new Element(tag); node.document = document; return node; },

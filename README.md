@@ -99,7 +99,7 @@ After intentional runtime changes, `node scripts/sync-prototype.mjs --write` ref
 
 ## Tests and evidence
 
-The pure gates and deterministic Node demo need **no installation, network, browser, server or child processes**:
+The isolated gates and deterministic Node demo need **no installation, network, browser, server or child processes**:
 
 ```sh
 node scripts/run-gates.mjs
@@ -107,6 +107,8 @@ node scripts/demo.mjs > result.json
 ```
 
 Each `test_file` in `buildsignal-gates.json` is directly runnable with Node; the gate runner imports them into its own process. `scripts/demo.mjs` is a deterministic executable Node program, not HTML. Its fixed seed, times and test ratings are illustrative.
+
+The isolated tests execute real app handlers with a minimal DOM substitute and controlled Web Locks, and real service workers in a Node VM. They check state, pending operations, import retries and preservation of other-tab data. They do not certify browser API behavior, native file pickers, layout or accessibility; actual browser checks remain separate. The loopback server suite checks both the main app and the isolated preview without requiring a browser.
 
 Actual UI/server checks are separate. Playwright is pinned as a development-only dependency, and no browser binary is bundled:
 
