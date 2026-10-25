@@ -32,6 +32,14 @@ function iso(value) {
   const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   return day >= 1 && day <= days[month - 1];
 }
+function atOrAfter(value, reference) {
+  const difference = Date.parse(value) - Date.parse(reference);
+  if (difference !== 0) return difference > 0;
+  // Date.parse truncates fractional seconds after three digits. Preserve the
+  // extra precision we accept on import, including equivalent zone spellings.
+  const remainder = stamp => (stamp.match(/\.(\d+)(?:Z|[+-]\d{2}:?\d{2})$/)?.[1].slice(3) || '').replace(/0+$/, '');
+  return remainder(value) >= remainder(reference);
+}
 export function emptySession() {
   return { version: 2, phase: 'setup', remember: false, synthetic: false, question: '',
     inputs: [{ origin: '', text: '' }, { origin: '', text: '' }],
@@ -82,7 +90,7 @@ export function lockAndReveal(session, verdict, note = '', now = new Date().toIS
   validateSession(session);
   requireThat(['A', 'B', 'tie', 'neither'].includes(verdict), 'Choose your verdict before revealing the sources.');
   text(note, LIMITS.note, 'Your note');
-  requireThat(iso(now) && Date.parse(now) >= Date.parse(session.randomization.assignedAt), 'The lock time must not precede the comparison.');
+  requireThat(iso(now) && atOrAfter(now, session.randomization.assignedAt), 'The lock time must not precede the comparison.');
   return { ...copy(session), phase: 'revealed', verdict, note, lockedAt: now };
 }
 // The only data projection used to render the blind UI: deliberately omits origins,
@@ -127,7 +135,7 @@ export function validateSession(raw) {
     requireThat(Array.isArray(r.order) && r.order.length === 2 && expected.every((value, i) => value === r.order[i]), 'The recorded order does not match the seed.');
     next.randomization = { algorithm: ALGORITHM, seed: r.seed, order: expected, assignedAt: r.assignedAt };
     if (raw.phase === 'revealed') {
-      requireThat(next.verdict !== null && iso(raw.lockedAt) && Date.parse(raw.lockedAt) >= Date.parse(r.assignedAt), 'The result needs a locked verdict and valid lock time.');
+      requireThat(next.verdict !== null && iso(raw.lockedAt) && atOrAfter(raw.lockedAt, r.assignedAt), 'The result needs a locked verdict and valid lock time.');
       next.lockedAt = raw.lockedAt;
     } else requireThat(raw.lockedAt === null, 'A blind comparison cannot have a lock time.');
   }

@@ -129,6 +129,25 @@ test('timestamp validation preserves leap days and explicit timezone offsets', (
   assert.throws(() => lockAndReveal(s, 'A', '', '2026-09-21T03:59:59Z'), /lock time/);
   assert.equal(lockAndReveal(s, 'A', '', time).lockedAt, time);
 });
+test('lock chronology retains accepted timestamp precision beyond milliseconds', () => {
+  for (const assignedAt of ['2026-09-21T04:00:00.123456Z', '2026-09-21T04:00:00.0000001Z']) {
+    const s = beginBlind(demoSession(), { seed: 0, now: assignedAt });
+    const fraction = assignedAt.match(/\.(\d+)Z$/)[1];
+    const earlier = assignedAt.replace(fraction, (BigInt(fraction) - 1n).toString().padStart(fraction.length, '0'));
+    assert.equal(Date.parse(earlier), Date.parse(assignedAt), 'These instants differ below Date.parse precision.');
+    assert.throws(() => lockAndReveal(s, 'A', '', earlier), /lock time/);
+    const imported = JSON.parse(exportResult(result()));
+    imported.comparison.randomization.assignedAt = assignedAt;
+    imported.comparison.lockedAt = earlier;
+    assert.throws(() => importResult(JSON.stringify(imported)), /lock time/);
+    for (const equal of [assignedAt, assignedAt.replace('Z', '0+00:00'), assignedAt.replace('04:', '01:').replace('Z', '-0300')]) {
+      assert.equal(lockAndReveal(s, 'A', '', equal).lockedAt, equal);
+    }
+    for (const laterAt of ['2026-09-21T04:00:00.1234567Z', '2026-09-21T04:00:00.124Z', later]) {
+      assert.equal(lockAndReveal(s, 'A', '', laterAt).lockedAt, laterAt);
+    }
+  }
+});
 test('export is impossible during setup or blind comparison', () => {
   assert.throws(() => exportResult(demoSession())); assert.throws(() => exportResult(rated()));
 });
