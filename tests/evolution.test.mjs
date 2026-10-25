@@ -181,6 +181,47 @@ test('a file read completed after the view changes cannot replace the new compar
   assert.equal(app.get('#reset-dialog').open, false);
   assert.equal(app.get('#export-button'), null);
 });
+test('only the most recently selected file can open a result or report a read error', async () => {
+  for (const lateFailure of [false, true]) {
+    const app = await appFixture();
+    let resolveOld, rejectOld;
+    const oldRead = new Promise((resolve, reject) => { resolveOld = resolve; rejectOld = reject; });
+    const first = app.chooseFile({ name: 'old.json', size: 100, text: () => oldRead });
+    const latest = { ...result(), note: 'Only the latest selected result belongs in this tab.' };
+    await app.chooseFile({ name: 'latest.json', size: 100, text: async () => exportResult(latest) });
+    await settleApp();
+    assert.ok(app.get('#export-button'));
+    if (lateFailure) rejectOld(new Error('The old file is no longer readable.'));
+    else resolveOld(exportResult(result()));
+    await first; await settleApp();
+    assert.equal(app.get('#error').hidden, true);
+    assert.equal(app.get('#reset-dialog').open, false);
+    assert.equal(app.get('#remember').checked, false);
+    assert.equal(app.data.has(STORAGE_KEY), false);
+    await app.get('#copy-note').click();
+    assert.equal(app.get('#copy-text').value, decisionNote(latest));
+  }
+});
+test('a pending import followed by an invalid newer file cannot reopen the superseded result', async () => {
+  for (const lateFailure of [false, true]) {
+    const app = await appFixture();
+    await app.input('#question', 'My draft must survive both file attempts.');
+    let resolveOld, rejectOld;
+    const first = app.chooseFile({ name: 'old.json', size: 100, text: () => new Promise((resolve, reject) => { resolveOld = resolve; rejectOld = reject; }) });
+    await app.chooseFile({ name: 'invalid.json', size: 2, text: async () => '{}' });
+    const message = app.get('#error').textContent;
+    assert.match(message, /not an Answer Lens result/);
+    if (lateFailure) rejectOld(new Error('An obsolete read failure must not replace the newer error.'));
+    else resolveOld(exportResult(result()));
+    await first; await settleApp();
+    assert.equal(app.get('#error').hidden, false);
+    assert.equal(app.get('#error').textContent, message);
+    assert.equal(app.get('#question').value, 'My draft must survive both file attempts.');
+    assert.equal(app.get('#reset-dialog').open, false);
+    assert.equal(app.get('#import-file').value, '');
+    assert.equal(app.data.has(STORAGE_KEY), false);
+  }
+});
 test('an actual old v1 export migrates to v2 without changing its verdict or ratings', () => {
   const old = legacyResult(); const json = v1.exportResult(old); const upgraded = importResult(json);
   assert.equal(upgraded.version, 2); assert.equal(upgraded.phase, 'revealed'); assert.equal(upgraded.remember, false);
