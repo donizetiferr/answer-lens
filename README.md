@@ -28,7 +28,7 @@ Open `http://127.0.0.1:4173`. Use `PORT=4180 node scripts/serve.mjs` for a diffe
 
 After **Offline app ready**, the app shell is cached for later offline reloads on the same origin. This is separate from saving your comparison. A different browser/origin/port, browser eviction, or clearing site data can remove stored data or offline availability.
 
-While online, shell requests revalidate the current app files and refresh their offline copies. Network failures and HTTP errors fall back to the last cached file when available; failed responses never replace that copy. Cache storage failure does not prevent an available online response from loading. Offline availability still depends on the browser retaining the shell cache.
+While online, shell requests revalidate the current app files and refresh their offline copies. Network failures, HTTP errors and connections stalled for three seconds fall back to the last cached file when available; failed responses never replace that copy. Cache storage failure does not prevent an available online response from loading. Offline availability still depends on the browser retaining the shell cache.
 
 ## Compare without filling out a questionnaire
 

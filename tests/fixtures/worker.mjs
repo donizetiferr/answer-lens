@@ -7,13 +7,16 @@ export async function workerFixture(path, scope) {
     async match(url) { return entries.get(url)?.clone(); },
     async put(url, response) { entries.set(url, response.clone()); }
   };
-  const fixture = { entries, requests, cache, network: async () => new Response('current shell'),
-    cacheError: false };
+  const timers = new Map(); let nextTimer = 0;
+  const fixture = { entries, requests, cache, timers, network: async () => new Response('current shell'),
+    cacheError: false, expireTimers() { for (const [id, { run }] of timers) { timers.delete(id); run(); } } };
   runInNewContext(await readFile(path, 'utf8'), {
-    URL, Response,
+    URL, Response, AbortController,
+    setTimeout(run, delay) { const id = ++nextTimer; timers.set(id, { run, delay }); return id; },
+    clearTimeout(id) { timers.delete(id); },
     self: { registration: { scope }, addEventListener: (type, handler) => handlers.set(type, handler) },
     caches: { async open() { if (fixture.cacheError) throw new Error('Cache storage denied'); return cache; } },
-    fetch: async (request, options) => { requests.push({ request, options }); return fixture.network(request); }
+    fetch: async (request, options) => { requests.push({ request, options }); return fixture.network(request, options); }
   });
   fixture.request = async (path, method = 'GET') => {
     let response;

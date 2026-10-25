@@ -146,3 +146,61 @@ test('cache access and write failures cannot break an available online shell', a
     await assert.rejects(worker.request('index.html'), /Offline/);
   }
 });
+test('a stalled network request cannot hold a cached offline shell indefinitely', async () => {
+  for (const prefix of ['', `${COLLECTION}/`]) {
+    const scope = `https://answer-lens.example/${prefix}`;
+    const worker = await workerFixture(join(ROOT, prefix, 'sw.js'), scope);
+    worker.entries.set(new URL('index.html', scope).href, new Response('offline shell'));
+    let started, signal;
+    const fetching = new Promise(resolve => { started = resolve; });
+    worker.network = (_request, options) => new Promise((_resolve, reject) => {
+      signal = options.signal;
+      signal?.addEventListener('abort', () => reject(new Error('Network timed out')));
+      started();
+    });
+    const pending = worker.request('index.html');
+    await fetching;
+    assert.ok(signal, 'The worker must be able to cancel a stalled network request.');
+    assert.equal(worker.timers.size, 1);
+    assert.ok([...worker.timers.values()][0].delay <= 5000);
+    worker.expireTimers();
+    assert.equal(await (await pending).text(), 'offline shell');
+    assert.equal(signal.aborted, true);
+    assert.equal(worker.timers.size, 0);
+    worker.network = async () => new Response('online shell');
+    assert.equal(await (await worker.request('index.html')).text(), 'online shell');
+    assert.equal(worker.timers.size, 0, 'Successful requests must release their deadline.');
+  }
+});
+test('a response interrupted after its headers falls back without caching a broken body', async () => {
+  for (const prefix of ['', `${COLLECTION}/`]) {
+    const scope = `https://answer-lens.example/${prefix}`;
+    const worker = await workerFixture(join(ROOT, prefix, 'sw.js'), scope);
+    const url = new URL('src/app.js', scope).href;
+    worker.entries.set(url, new Response('complete cached script'));
+    worker.network = async () => new Response(new ReadableStream({
+      start(controller) { controller.error(new TypeError('Connection interrupted')); }
+    }));
+    assert.equal(await (await worker.request('src/app.js')).text(), 'complete cached script');
+    assert.equal(await worker.entries.get(url).clone().text(), 'complete cached script');
+    assert.equal(worker.timers.size, 0);
+  }
+});
+test('the offline deadline also cancels a body that stalls after successful headers', async () => {
+  for (const prefix of ['', `${COLLECTION}/`]) {
+    const scope = `https://answer-lens.example/${prefix}`;
+    const worker = await workerFixture(join(ROOT, prefix, 'sw.js'), scope);
+    worker.entries.set(new URL('index.html', scope).href, new Response('complete offline page'));
+    let reading;
+    const bodyStarted = new Promise(resolve => { reading = resolve; });
+    worker.network = async (_request, { signal }) => new Response(new ReadableStream({
+      start(controller) { signal.addEventListener('abort', () => controller.error(new Error('Body timed out'))); },
+      pull() { reading(); return new Promise(() => {}); }
+    }));
+    const pending = worker.request('index.html');
+    await bodyStarted;
+    worker.expireTimers();
+    assert.equal(await (await pending).text(), 'complete offline page');
+    assert.equal(worker.timers.size, 0);
+  }
+});

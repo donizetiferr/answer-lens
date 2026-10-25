@@ -13,15 +13,23 @@ self.addEventListener('fetch', event => {
     // those files change without a product-version bump. Refresh on each load;
     // keep the last successful shell available when the network is unavailable.
     const cache = await caches.open(CACHE).catch(() => null);
-    const cached = () => cache?.match(url.href).catch(() => undefined);
+    const fallback = await cache?.match(url.href).catch(() => undefined);
+    const controller = new AbortController();
+    // A captive portal or stalled connection must not strand an offline-ready
+    // app. Only impose a deadline when there is a usable cached response.
+    const deadline = fallback ? setTimeout(() => controller.abort(), 3000) : null;
     let response;
-    try { response = await fetch(event.request, { cache: 'no-cache' }); }
+    try {
+      response = await fetch(event.request, { cache: 'no-cache', signal: controller.signal });
+      // Fetch resolves at the headers. Keep the deadline until a successful
+      // shell body is complete, so interrupted scripts also get the fallback.
+      if (response.ok) await response.clone().arrayBuffer();
+    }
     catch (error) {
-      const fallback = await cached();
       if (fallback) return fallback;
       throw error;
-    }
-    if (!response.ok) return (await cached()) || response;
+    } finally { if (deadline !== null) clearTimeout(deadline); }
+    if (!response.ok) return fallback || response;
     if (cache) event.waitUntil(cache.put(url.href, response.clone()).catch(() => {}));
     return response;
   })());
