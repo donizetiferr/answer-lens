@@ -114,6 +114,8 @@ Storage reads in the app fixture are explicitly bound to its injected device sto
 
 The same fixture also executes the generated preview handlers with their own storage keys. Local cases cover delayed imports during a confirmation, quota and deletion failures, clearing optional ratings without clearing the verdict/reason, root/preview data isolation, and older clipboard completions after a restricted-viewer JSON export. The opaque-origin case checks application control flow; it does not emulate browser sandbox enforcement or native form behavior.
 
+Storage races also cover a deletion receipt arriving after a newer other-tab notice, changed saved bytes before the storage event arrives, replacement confirmations waiting for a lock, and unrelated local/session-storage events. These controlled schedules verify preservation of drafts, consent and saved records; they do not measure native browser event timing.
+
 Actual UI/server checks are separate. Playwright is pinned as a development-only dependency, and no browser binary is bundled:
 
 ```sh

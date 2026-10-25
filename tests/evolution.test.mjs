@@ -719,6 +719,89 @@ test('a late deletion receipt cannot erase a newer other-tab conflict or protect
     assert.equal(question.value, 'Keep this new draft and its current focus.');
   }
 });
+test('queued saves and resets preserve changed device bytes even before a storage event arrives', async () => {
+  for (const preview of [false, true]) for (const operation of ['save', 'reset']) for (const other of [
+    null, JSON.stringify({ ...demoSession(true), question: 'A concurrent supported draft.' }),
+    '{"version":99,"question":"A concurrent future-format draft."}'
+  ]) {
+    const locks = controlledLocks();
+    const app = await appFixture({ preview, locks, initial: JSON.stringify(demoSession(true)) });
+    const key = preview ? 'answer-lens.preview.session.v2' : STORAGE_KEY;
+    try {
+      if (operation === 'save') await app.input('#question', 'The current edit must stay in this tab.');
+      else { await app.get('#reset-button').click(); await app.get('#confirm-reset').click(); }
+      await settleApp();
+      assert.equal(locks.pending.length, 1);
+      const question = app.get('#question'); question.focus();
+      if (other === null) app.data.delete(key); else app.data.set(key, other);
+      // Deliberately do not dispatch storage: the check under the lock must be
+      // sufficient even when the browser has not delivered that event yet.
+      await locks.release();
+      assert.equal(app.data.get(key) ?? null, other);
+      assert.equal(app.get('#data-status').dataset.state, 'conflict');
+      assert.equal(app.get('#remember').checked, false);
+      assert.equal(app.get('#question'), question);
+      assert.equal(app.document.activeElement, question);
+      assert.equal(question.value, operation === 'save' ? 'The current edit must stay in this tab.' : '');
+    } finally { await locks.drain(); }
+  }
+});
+test('a confirmed replacement rechecks the saved copy after waiting for its lock', async () => {
+  for (const preview of [false, true]) for (const future of [false, true]) {
+    const locks = controlledLocks();
+    const app = await appFixture({ preview, locks });
+    const key = preview ? 'answer-lens.preview.session.v2' : STORAGE_KEY;
+    try {
+      await app.input('#question', 'My draft survives a stale replacement choice.');
+      app.data.set(key, JSON.stringify(demoSession(true)));
+      await app.window.fire('storage', { key, storageArea: app.localStorage });
+      app.get('#remember').checked = true; await app.get('#remember').fire('change');
+      await app.get('#confirm-reset').click(); await settleApp();
+      assert.equal(locks.pending.length, 1);
+      const latest = future ? '{"version":99,"question":"A future copy created while waiting."}'
+        : JSON.stringify({ ...demoSession(true), question: 'A new copy after confirmation.' });
+      app.data.set(key, latest);
+      await locks.release();
+      assert.equal(app.data.get(key), latest);
+      assert.equal(app.get('#data-status').dataset.state, 'conflict');
+      assert.equal(app.get('#remember').checked, false);
+      assert.equal(app.get('#question').value, 'My draft survives a stale replacement choice.');
+      app.get('#remember').checked = true; await app.get('#remember').fire('change');
+      if (future) {
+        assert.equal(app.get('#remember').disabled, true);
+        assert.equal(app.get('#data-status').dataset.state, 'protected');
+        assert.equal(app.get('#reset-dialog').open, false);
+      } else {
+        assert.equal(app.get('#reset-dialog').open, true);
+        await app.get('#confirm-reset').click(); await settleApp(); await locks.release();
+        assert.equal(app.get('#data-status').dataset.state, 'saved');
+        assert.equal(JSON.parse(app.data.get(key)).question, 'My draft survives a stale replacement choice.');
+      }
+    } finally { await locks.drain(); }
+  }
+});
+test('unrelated local and session-storage events do not pause or cancel this tab saving', async () => {
+  for (const preview of [false, true]) {
+    const locks = controlledLocks(); const app = await appFixture({ preview, locks });
+    const key = preview ? 'answer-lens.preview.session.v2' : STORAGE_KEY;
+    try {
+      await app.input('#question', 'Only this comparison belongs in the pending write.');
+      const question = app.get('#question'); question.focus();
+      app.get('#remember').checked = true; await app.get('#remember').fire('change'); await settleApp();
+      const unrelatedArea = { getItem() { throw new Error('Unrelated storage must not be read.'); } };
+      for (const event of [
+        { key: 'another-app', storageArea: app.localStorage },
+        { key, storageArea: unrelatedArea }, { key: null, storageArea: unrelatedArea }
+      ]) await app.window.fire('storage', event);
+      assert.equal(app.get('#remember').checked, true);
+      assert.equal(app.get('#data-status').dataset.state, 'saving');
+      assert.equal(app.document.activeElement, question);
+      await locks.release();
+      assert.equal(app.get('#data-status').dataset.state, 'saved');
+      assert.equal(JSON.parse(app.data.get(key)).question, question.value);
+    } finally { await locks.drain(); }
+  }
+});
 test('preview app handlers keep root records and ignore root-tab storage events', async () => {
   const app = await appFixture({ preview: true });
   const root = JSON.stringify({ ...result(), remember: true });
