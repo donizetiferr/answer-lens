@@ -44,7 +44,7 @@
         "largura": 1440,
         "altura": 1000
       },
-      "origem": "Aplicativo raiz 2.0.0; SHA-256 do conjunto fonte 4bd10f0eba1e98644e7a7b8305ad0280413808ca768b67ca763ec0233e4e6240. Adaptações de preview documentadas em resources.json.",
+      "origem": "Aplicativo raiz 2.0.0; SHA-256 do conjunto fonte dbac5701afdf4babfabe580986ba4ff2f9ff8716eac31c7c9e8faa370150c31b. Adaptações de preview documentadas em resources.json.",
       "build": "2.0.0",
       "recursos": [
         "styles.css",
@@ -62,7 +62,7 @@
       "tipo": "prototipo",
       "capacidade": "interacao-local",
       "estado": "preparação; leitura A/B; decisão; cópia; próximo par; salvamento isolado",
-      "origem": "Aplicativo raiz 2.0.0; SHA-256 do conjunto fonte 4bd10f0eba1e98644e7a7b8305ad0280413808ca768b67ca763ec0233e4e6240. Adaptações de preview documentadas em resources.json.",
+      "origem": "Aplicativo raiz 2.0.0; SHA-256 do conjunto fonte dbac5701afdf4babfabe580986ba4ff2f9ff8716eac31c7c9e8faa370150c31b. Adaptações de preview documentadas em resources.json.",
       "build": "2.0.0",
       "recursos": [
         "styles.css",

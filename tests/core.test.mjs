@@ -92,6 +92,29 @@ test('timestamps and note lengths are checked', () => {
   assert.throws(() => lockAndReveal(rated(), 'A', '', '2025-01-01T00:00:00.000Z'));
   assert.throws(() => lockAndReveal(rated(), 'A', 'x'.repeat(LIMITS.note + 1), later));
 });
+test('timestamps reject normalized calendar dates and timezone-dependent local times', () => {
+  for (const invalid of ['2026-02-29T04:00:00.000Z', '2026-02-30T04:00:00.000Z',
+    '2026-04-31T04:00:00.000Z', '2026-09-21T04:00:00.000']) {
+    assert.throws(() => beginBlind(demoSession(), { seed: 0, now: invalid }), /timestamp/, invalid);
+    const imported = JSON.parse(exportResult(result()));
+    imported.comparison.randomization.assignedAt = '2020-01-01T00:00:00Z';
+    imported.comparison.lockedAt = invalid;
+    assert.throws(() => importResult(JSON.stringify(imported)), /lock time/, invalid);
+    const saved = blind(); saved.randomization.assignedAt = invalid;
+    assert.throws(() => validateSession(saved), /randomization/, invalid);
+  }
+});
+test('timestamp validation preserves leap days and explicit timezone offsets', () => {
+  for (const valid of ['2024-02-29T04:00:00.000Z', '2000-02-29T04:00:00Z',
+    '2026-09-21T01:00:00-03:00', '2026-09-21T06:00:00.123+02:00']) {
+    const s = beginBlind(demoSession(), { seed: 0, now: valid });
+    assert.equal(s.randomization.assignedAt, valid);
+    assert.equal(lockAndReveal(s, 'A', '', valid).lockedAt, valid);
+  }
+  const s = beginBlind(demoSession(), { seed: 0, now: '2026-09-21T01:00:00-03:00' });
+  assert.throws(() => lockAndReveal(s, 'A', '', '2026-09-21T03:59:59Z'), /lock time/);
+  assert.equal(lockAndReveal(s, 'A', '', time).lockedAt, time);
+});
 test('export is impossible during setup or blind comparison', () => {
   assert.throws(() => exportResult(demoSession())); assert.throws(() => exportResult(rated()));
 });

@@ -21,7 +21,16 @@ function text(value, max, name, required = false) {
   return value;
 }
 function iso(value) {
-  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value) && Number.isFinite(Date.parse(value));
+  if (typeof value !== 'string') return false;
+  // An explicit zone makes exported chronology independent of the reader's
+  // device. Date.parse alone silently normalizes impossible days into March.
+  const parts = /^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.exec(value);
+  if (!parts || !Number.isFinite(Date.parse(value))) return false;
+  const [, yearText, monthText, dayText] = parts;
+  const year = Number(yearText), month = Number(monthText), day = Number(dayText);
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day >= 1 && day <= days[month - 1];
 }
 export function emptySession() {
   return { version: 2, phase: 'setup', remember: false, synthetic: false, question: '',
