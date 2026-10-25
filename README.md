@@ -110,6 +110,8 @@ Each `test_file` in `buildsignal-gates.json` is directly runnable with Node; the
 
 The isolated tests execute real app handlers with a minimal DOM substitute and controlled Web Locks, and real service workers in a Node VM. They check state, pending operations, import retries and preservation of other-tab data. They do not certify browser API behavior, native file pickers, layout or accessibility; actual browser checks remain separate. The loopback server suite checks both the main app and the isolated preview without requiring a browser.
 
+Storage reads in the app fixture are explicitly bound to its injected device storage, including initial restoration, legacy opening and conflict rechecks. Clipboard promises are controlled to check stale feedback and selected-text fallback. Worker lifecycle tests check precache-before-takeover ordering and cache cleanup by scope; they do not emulate native `Cache.addAll` atomicity, OS clipboard ordering or actual page control.
+
 Actual UI/server checks are separate. Playwright is pinned as a development-only dependency, and no browser binary is bundled:
 
 ```sh

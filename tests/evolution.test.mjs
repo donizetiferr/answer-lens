@@ -373,6 +373,53 @@ test('an external save cancels this queued write and reset leaves the other tab 
     assert.equal(locks.pending.length, 0, 'Reset must not request a deletion for another tab record.');
   } finally { await locks.drain(); }
 });
+test('a stale replacement confirmation preserves the latest other-tab record and a fresh confirmation can save', async () => {
+  const app = await appFixture();
+  await app.input('#question', 'Keep my independent draft.');
+  const other = note => JSON.stringify({ ...result(), remember: true, note });
+  const receive = async raw => {
+    app.data.set(STORAGE_KEY, raw);
+    await app.window.fire('storage', { key: STORAGE_KEY, storageArea: app.localStorage });
+  };
+  const enable = async () => { app.get('#remember').checked = true; await app.get('#remember').fire('change'); };
+  await receive(other('First external snapshot.'));
+  await enable();
+  assert.equal(app.get('#reset-dialog').open, true);
+  const latest = other('Updated while the confirmation was open.');
+  await receive(latest);
+  await app.get('#confirm-reset').click(); await settleApp();
+  assert.equal(app.data.get(STORAGE_KEY), latest);
+  assert.equal(app.get('#data-status').dataset.state, 'conflict');
+  assert.equal(app.get('#remember').checked, false);
+  assert.equal(app.get('#question').value, 'Keep my independent draft.');
+  await enable();
+  assert.equal(app.get('#reset-dialog').open, true);
+  await app.get('#confirm-reset').click(); await settleApp();
+  assert.equal(app.get('#data-status').dataset.state, 'saved');
+  assert.equal(app.get('#remember').checked, true);
+  assert.equal(JSON.parse(app.data.get(STORAGE_KEY)).question, 'Keep my independent draft.');
+});
+test('future other-tab records disable saving and remain protected until that record changes', async () => {
+  const app = await appFixture({ initial: JSON.stringify(demoSession(true)) });
+  const future = '{"version":99,"private":"Synthetic future record."}';
+  app.data.set(STORAGE_KEY, future);
+  await app.window.fire('storage', { key: null, storageArea: app.localStorage });
+  assert.equal(app.get('#data-status').dataset.state, 'protected');
+  assert.equal(app.get('#remember').checked, false);
+  assert.equal(app.get('#remember').disabled, true);
+  await app.input('#question', 'My draft stays editable while device data is protected.');
+  assert.equal(app.data.get(STORAGE_KEY), future);
+  app.data.delete(STORAGE_KEY);
+  await app.window.fire('storage', { key: STORAGE_KEY, storageArea: app.localStorage });
+  assert.equal(app.get('#data-status').dataset.state, 'conflict');
+  assert.equal(app.get('#remember').disabled, false);
+  assert.equal(app.get('#question').value, 'My draft stays editable while device data is protected.');
+  app.get('#remember').checked = true; await app.get('#remember').fire('change');
+  assert.equal(app.get('#reset-dialog').open, true);
+  await app.get('#cancel-reset').click();
+  assert.equal(app.data.has(STORAGE_KEY), false);
+  assert.equal(app.get('#remember').checked, false);
+});
 test('a rejected save stays unsaved and retry saves the current draft before removing the leave warning', async () => {
   const locks = { async request() { throw new Error('Lock service temporarily failed.'); } };
   const app = await appFixture({ locks });

@@ -111,6 +111,50 @@ test('root and preview workers refresh cached shell files online and retain them
     assert.equal(worker.requests.length, 2);
   }
 });
+test('workers finish precaching before takeover and only remove obsolete caches in their own scope', async () => {
+  for (const preview of [false, true]) {
+    const directory = preview ? `${COLLECTION}/` : '';
+    const scope = `https://answer-lens.example/${directory}`;
+    const prefix = `${preview ? 'answer-lens-preview-shell' : 'answer-lens-shell'}:/${directory}:`;
+    const worker = await workerFixture(join(ROOT, directory, 'sw.js'), scope);
+    const obsolete = `${prefix}1.0.0`;
+    const unrelated = ['another-app:1', 'answer-lens-shell:/other-scope/:1',
+      preview ? 'answer-lens-shell:/:2.0.0' : `answer-lens-preview-shell:/${COLLECTION}/:2.0.0-catalog-r3-viewer`];
+    for (const name of [obsolete, ...unrelated]) worker.cacheNames.add(name);
+    let finishPrecache, started;
+    const precaching = new Promise(resolve => { started = resolve; });
+    worker.cache.addAll = paths => {
+      worker.precached.push(...paths); started();
+      return new Promise(resolve => { finishPrecache = resolve; });
+    };
+    const install = worker.lifecycle('install'); await precaching;
+    assert.equal(worker.skipped, false, 'Takeover must not happen with an incomplete app shell.');
+    assert.equal(worker.claimed, false);
+    finishPrecache(); await install;
+    assert.equal(worker.skipped, true);
+    assert.deepEqual(worker.deleted, []);
+    for (const path of ['./', './index.html', './styles.css', './icon.svg', './src/app.js', './src/core.js', './src/storage.js', './src/demo.js', './src/output.js',
+      ...(preview ? ['./comparison.html', './mobile.html'] : [])]) assert.ok(worker.precached.includes(path), path);
+    assert.equal(worker.precached.length, preview ? 11 : 9);
+    await worker.lifecycle('activate');
+    assert.equal(worker.claimed, true);
+    assert.deepEqual(worker.deleted, [obsolete]);
+    for (const name of unrelated) assert.ok(worker.cacheNames.has(name), name);
+    assert.equal([...worker.cacheNames].filter(name => name.startsWith(prefix)).length, 1);
+  }
+});
+test('failed shell precaching never requests takeover or deletes the prior offline cache', async () => {
+  for (const directory of ['', `${COLLECTION}/`]) {
+    const worker = await workerFixture(join(ROOT, directory, 'sw.js'), `https://answer-lens.example/${directory}`);
+    worker.cacheNames.add('prior offline cache');
+    worker.cache.addAll = async () => { throw new Error('One shell file could not be cached'); };
+    await assert.rejects(worker.lifecycle('install'), /could not be cached/);
+    assert.equal(worker.skipped, false);
+    assert.equal(worker.claimed, false);
+    assert.deepEqual(worker.deleted, []);
+    assert.ok(worker.cacheNames.has('prior offline cache'));
+  }
+});
 test('HTTP errors never poison the offline shell and uncached errors stay errors', async () => {
   for (const prefix of ['', `${COLLECTION}/`]) {
     const scope = `https://answer-lens.example/${prefix}`;
