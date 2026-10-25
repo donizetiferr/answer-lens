@@ -142,7 +142,8 @@ export function resultObject(session) {
 }
 export const exportResult = session => JSON.stringify(resultObject(session), null, 2);
 export function importResult(json) {
-  requireThat(typeof json === 'string' && json.length <= LIMITS.json, 'Result file is too large.');
+  requireThat(typeof json === 'string' && json.length <= LIMITS.json &&
+    new TextEncoder().encode(json).byteLength <= LIMITS.json, 'Result file is too large.');
   let data; try { data = JSON.parse(json); } catch { throw new Error('This is not valid JSON.'); }
   requireThat(isObject(data) && ['answer-lens-result/1', 'answer-lens-result/2'].includes(data.schema) && data.assessment === 'human-self-report', 'This is not an Answer Lens result.');
   const session = data.schema === 'answer-lens-result/1' ? migrateV1(data.comparison) : validateSession(data.comparison);

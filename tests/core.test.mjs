@@ -132,6 +132,21 @@ test('tampered shuffle, invalid supplied ratings, wrong schema and malformed JSO
   const invalid = result(); invalid.ratings.A.clarity = 9; assert.throws(() => validateSession(invalid));
   for (const json of ['{', '{}', 'null', '{"schema":"another-app"}', 'x'.repeat(LIMITS.json + 1)]) assert.throws(() => importResult(json));
 });
+test('the JSON import limit counts UTF-8 bytes, including multibyte padding', () => {
+  const data = JSON.parse(exportResult(result()));
+  data.extra = '界'.repeat(210000);
+  const oversized = JSON.stringify(data);
+  assert.ok(oversized.length < LIMITS.json);
+  assert.ok(Buffer.byteLength(oversized, 'utf8') > LIMITS.json);
+  assert.throws(() => importResult(oversized), /too large/);
+  for (const suffix of ['x', 'é', '界', '😀']) {
+    const base = JSON.stringify({ ...data, extra: suffix });
+    const exact = base + ' '.repeat(LIMITS.json - Buffer.byteLength(base, 'utf8'));
+    assert.equal(Buffer.byteLength(exact, 'utf8'), LIMITS.json);
+    assert.equal(importResult(exact).verdict, data.comparison.verdict);
+    assert.throws(() => importResult(exact + ' '), /too large/);
+  }
+});
 test('saved phase invariants are enforced and unknown fields do not enter state', () => {
   const setup = emptySession(); setup.verdict = 'A'; assert.throws(() => validateSession(setup));
   const session = result(); session.untrustedExtra = '<script>bad</script>';
