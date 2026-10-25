@@ -393,7 +393,9 @@ window.addEventListener('storage', event => {
   if (event.key !== STORAGE_KEY && event.key !== null) return;
   try { if (event.storageArea !== localStorage) return; } catch { return; }
   const current = loadLocal();
-  if (current.ok && current.raw === localRaw) return;
+  // A protected record may have been replaced with our original snapshot (or
+  // removed). Equal bytes do not mean the protection state is still current.
+  if (current.ok && current.raw === localRaw && !protectedData) return;
   // Never re-render, replace the draft, steal focus or silently accept another tab's data.
   ++saveTicket; session.remember = false; externalChanged = true;
   protectedData = !!current.protected;

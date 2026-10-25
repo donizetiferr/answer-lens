@@ -420,6 +420,35 @@ test('future other-tab records disable saving and remain protected until that re
   assert.equal(app.data.has(STORAGE_KEY), false);
   assert.equal(app.get('#remember').checked, false);
 });
+test('restoring the original snapshot after a protected record unlocks the saving choice without replacing this draft', async () => {
+  for (const initial of [null, JSON.stringify(demoSession(true))]) {
+    const app = await appFixture({ initial });
+    await app.input('#question', 'Keep my current draft and focus.'); await settleApp();
+    // Use the last successfully observed snapshot, including a saved edit.
+    const original = app.data.get(STORAGE_KEY) ?? null;
+    const question = app.get('#question'); question.focus();
+    app.data.set(STORAGE_KEY, '{"version":99,"question":"Synthetic future format."}');
+    await app.window.fire('storage', { key: STORAGE_KEY, storageArea: app.localStorage });
+    assert.equal(app.get('#remember').disabled, true);
+    assert.equal(app.get('#data-status').dataset.state, 'protected');
+    if (original === null) app.data.delete(STORAGE_KEY);
+    else app.data.set(STORAGE_KEY, original);
+    await app.window.fire('storage', { key: original === null ? null : STORAGE_KEY, storageArea: app.localStorage });
+    assert.equal(app.get('#remember').disabled, false, 'A supported or absent record must no longer be protected.');
+    assert.equal(app.get('#remember').checked, false, 'Recovery never silently re-enables saving.');
+    assert.equal(app.get('#data-status').dataset.state, 'conflict');
+    assert.equal(app.get('#question'), question);
+    assert.equal(question.value, 'Keep my current draft and focus.');
+    assert.equal(app.document.activeElement, question);
+    await app.input('#question', 'An explicit replacement can save this edit.');
+    app.get('#remember').checked = true; await app.get('#remember').fire('change');
+    assert.equal(app.get('#reset-dialog').open, true);
+    assert.equal(app.data.get(STORAGE_KEY) ?? null, original);
+    await app.get('#confirm-reset').click(); await settleApp();
+    assert.equal(app.get('#data-status').dataset.state, 'saved');
+    assert.equal(JSON.parse(app.data.get(STORAGE_KEY)).question, 'An explicit replacement can save this edit.');
+  }
+});
 test('a rejected save stays unsaved and retry saves the current draft before removing the leave warning', async () => {
   const locks = { async request() { throw new Error('Lock service temporarily failed.'); } };
   const app = await appFixture({ locks });
