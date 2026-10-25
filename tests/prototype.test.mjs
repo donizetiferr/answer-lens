@@ -9,6 +9,7 @@ import * as previewStorage from '../docs/design_refs/answer-lens/src/storage.js'
 import { demoSession } from '../src/demo.js';
 import { beginBlind } from '../src/core.js';
 import { legacySession } from './fixtures/sessions.mjs';
+import { workerFixture } from './fixtures/worker.mjs';
 const read = path => readFile(join(ROOT, COLLECTION, path), 'utf8');
 const digest = text => createHash('sha256').update(text).digest('hex');
 class MemoryStorage {
@@ -92,4 +93,56 @@ test('preview offline shell includes every HTML entry and uses its own cache nam
   assert.match(sw, /answer-lens-preview-shell:/); assert.match(sw, /catalog-r3/);
   for (const entry of ['index.html', 'comparison.html', 'mobile.html', 'src/output.js']) assert.ok(sw.includes(`'./${entry}'`));
   assert.doesNotMatch(sw, /answer-lens-shell:|localStorage|\.clear\(/);
+});
+test('root and preview workers refresh cached shell files online and retain them offline', async () => {
+  for (const prefix of ['', `${COLLECTION}/`]) {
+    const scope = `https://answer-lens.example/${prefix}`;
+    const worker = await workerFixture(join(ROOT, prefix, 'sw.js'), scope);
+    const url = new URL('src/core.js', scope).href;
+    worker.entries.set(url, new Response('old shell'));
+    assert.equal(await (await worker.request('src/core.js')).text(), 'current shell');
+    assert.equal(worker.requests.length, 1);
+    assert.equal(worker.requests[0].options.cache, 'no-cache');
+    worker.network = async () => { throw new TypeError('Offline'); };
+    assert.equal(await (await worker.request('src/core.js')).text(), 'current shell');
+    assert.equal(await worker.request('private-result.json'), undefined);
+    assert.equal(await worker.request('src/core.js', 'POST'), undefined);
+    assert.equal(await worker.request('https://external.example/src/core.js'), undefined);
+    assert.equal(worker.requests.length, 2);
+  }
+});
+test('HTTP errors never poison the offline shell and uncached errors stay errors', async () => {
+  for (const prefix of ['', `${COLLECTION}/`]) {
+    const scope = `https://answer-lens.example/${prefix}`;
+    const worker = await workerFixture(join(ROOT, prefix, 'sw.js'), scope);
+    const url = new URL('src/core.js', scope).href;
+    worker.entries.set(url, new Response('last good shell'));
+    for (const status of [404, 503]) {
+      worker.network = async () => new Response('server error', { status });
+      const fallback = await worker.request('src/core.js?reload=1');
+      assert.equal(fallback.status, 200);
+      assert.equal(await fallback.text(), 'last good shell');
+      assert.equal(await worker.entries.get(url).clone().text(), 'last good shell');
+      const uncached = await worker.request('styles.css');
+      assert.equal(uncached.status, status);
+      assert.equal(await uncached.text(), 'server error');
+    }
+    worker.network = async () => { throw new TypeError('Offline'); };
+    await assert.rejects(worker.request('styles.css'), /Offline/);
+  }
+});
+test('cache access and write failures cannot break an available online shell', async () => {
+  for (const prefix of ['', `${COLLECTION}/`]) {
+    const worker = await workerFixture(join(ROOT, prefix, 'sw.js'), `https://answer-lens.example/${prefix}`);
+    worker.cacheError = true;
+    assert.equal(await (await worker.request('index.html')).text(), 'current shell');
+    worker.cacheError = false;
+    worker.cache.put = async () => { throw new Error('Quota exhausted'); };
+    assert.equal(await (await worker.request('index.html')).text(), 'current shell');
+    worker.cache.match = async () => { throw new Error('Cache read denied'); };
+    worker.network = async () => new Response('server unavailable', { status: 503 });
+    assert.equal((await worker.request('index.html')).status, 503);
+    worker.network = async () => { throw new TypeError('Offline'); };
+    await assert.rejects(worker.request('index.html'), /Offline/);
+  }
 });

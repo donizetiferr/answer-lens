@@ -8,5 +8,21 @@ self.addEventListener('activate', event => event.waitUntil(caches.keys().then(ke
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url); url.search = ''; url.hash = '';
   if (event.request.method !== 'GET' || !URLS.has(url.href)) return;
-  event.respondWith(caches.open(CACHE).then(async cache => (await cache.match(url.href)) || fetch(event.request)));
+  event.respondWith((async () => {
+    // A cache-first shell pins an installed app to old source bytes, even when
+    // those files change without a product-version bump. Refresh on each load;
+    // keep the last successful shell available when the network is unavailable.
+    const cache = await caches.open(CACHE).catch(() => null);
+    const cached = () => cache?.match(url.href).catch(() => undefined);
+    let response;
+    try { response = await fetch(event.request, { cache: 'no-cache' }); }
+    catch (error) {
+      const fallback = await cached();
+      if (fallback) return fallback;
+      throw error;
+    }
+    if (!response.ok) return (await cached()) || response;
+    if (cache) event.waitUntil(cache.put(url.href, response.clone()).catch(() => {}));
+    return response;
+  })());
 });
